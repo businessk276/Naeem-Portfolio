@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import { cert, getApps, initializeApp } from 'firebase-admin/app';
+import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import {
   PortfolioData,
   Profile,
@@ -713,21 +713,23 @@ export class Database {
   }
 
   private createFirestore() {
-    const firebaseConfig = {
-      apiKey: process.env.VITE_FIREBASE_API_KEY,
-      authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.VITE_FIREBASE_APP_ID,
-    };
+    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-      console.warn('Firebase is not configured; using local database fallback.');
+    if (!projectId || !clientEmail || !privateKey) {
+      if (process.env.VERCEL === '1') {
+        throw new Error('Missing FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, or FIREBASE_PRIVATE_KEY in Vercel environment variables.');
+      }
+      console.warn('Firebase Admin credentials are not configured; using local database fallback.');
       return null;
     }
 
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const app = getApps().length > 0
+      ? getApps()[0]
+      : initializeApp({
+          credential: cert({ projectId, clientEmail, privateKey }),
+        });
     return getFirestore(app);
   }
 
@@ -763,7 +765,7 @@ export class Database {
     }
 
     if (this.firestore) {
-      await setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data });
+      await this.firestore.doc(FIRESTORE_DOCUMENT).set({ data: this.data });
       return;
     }
 
@@ -785,9 +787,9 @@ export class Database {
     if (!this.firestore) return;
 
     try {
-      const snapshot = await getDoc(doc(this.firestore, FIRESTORE_DOCUMENT));
-      if (snapshot.exists()) {
-        const stored = snapshot.data().data as Partial<DatabaseSchema>;
+      const snapshot = await this.firestore.doc(FIRESTORE_DOCUMENT).get();
+      if (snapshot.exists) {
+        const stored = snapshot.data()?.data as Partial<DatabaseSchema>;
         this.data = this.normalizeAssetPaths({
           ...defaultDatabase,
           ...stored,
@@ -795,7 +797,7 @@ export class Database {
           site_settings: { ...defaultDatabase.site_settings, ...(stored.site_settings || {}) },
         });
       } else {
-        await setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data });
+        await this.firestore.doc(FIRESTORE_DOCUMENT).set({ data: this.data });
       }
     } catch (err) {
       console.error('Error loading Firestore database; using local data:', err);
