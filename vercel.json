@@ -13,6 +13,12 @@
     },
     "api/auth/login.ts": {
       "includeFiles": "public/**"
+    },
+    "api/admin/messages.ts": {
+      "includeFiles": "public/**"
+    },
+    "api/admin/messages/[id].ts": {
+      "includeFiles": "public/**"
     }
   }
 }
