@@ -76,7 +76,7 @@ const defaultDatabase: DatabaseSchema = {
     location: 'Al Aziziyah, Riyadh, Saudi Arabia (KSA)',
     phone: '0538196763',
     email: 'Jidny7080@gmail.com',
-    profile_image: '/src/assets/images/jobaer_profile_1789985465704.jpg',
+    profile_image: '/uploads/ChatGPT_Image_Sep_21__2026__05_01_46_PM_png_1790006862798.png',
     logo_text: 'MJ',
     availability_status: 'AVAILABLE FOR WORK / PROJECTS',
     iqama_status: 'Transferable Iqama (9 Month Valid)',
@@ -810,9 +810,12 @@ export class Database {
 
   private normalizeAssetPaths(data: DatabaseSchema): DatabaseSchema {
     const normalize = (value: string) => value?.replace(/^\/src\/assets\/images\//, '/uploads/') || value;
+    const profileImage = data.profile.profile_image.includes('ChatGPT_Image_Sep_21__2026__05_01_46_PM_png_1789996213184.png')
+      ? '/uploads/ChatGPT_Image_Sep_21__2026__05_01_46_PM_png_1790006862798.png'
+      : normalize(data.profile.profile_image);
     return {
       ...data,
-      profile: { ...data.profile, profile_image: normalize(data.profile.profile_image) },
+      profile: { ...data.profile, profile_image: profileImage },
       site_settings: { ...data.site_settings, og_image: normalize(data.site_settings.og_image) },
       projects: data.projects.map(project => ({ ...project, thumbnail_url: normalize(project.thumbnail_url) })),
     };
