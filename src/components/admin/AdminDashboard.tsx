@@ -95,6 +95,12 @@ export default function AdminDashboard({
       setData(allData);
       setMessages(messagesData);
     } catch (err: any) {
+      if (err.message === 'ADMIN_SESSION_EXPIRED') {
+        localStorage.removeItem('mj_admin_token');
+        localStorage.removeItem('mj_admin_user');
+        onLogout();
+        return;
+      }
       showToast('error', err.message || 'Failed to load admin content');
     } finally {
       setLoading(false);

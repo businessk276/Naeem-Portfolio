@@ -37,6 +37,7 @@ export const api = {
     const res = await fetch('/api/admin/all', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (res.status === 401) throw new Error('ADMIN_SESSION_EXPIRED');
     if (!res.ok) throw new Error('Failed to fetch admin state');
     return res.json();
   },
@@ -123,6 +124,7 @@ export const api = {
     const res = await fetch('/api/admin/messages', {
       headers: { Authorization: `Bearer ${token}` },
     });
+    if (res.status === 401) throw new Error('ADMIN_SESSION_EXPIRED');
     if (!res.ok) throw new Error('Failed to fetch messages');
     return res.json();
   },

@@ -17,6 +17,9 @@
     "api/admin/messages.ts": {
       "includeFiles": "public/**"
     },
+    "api/admin/all.ts": {
+      "includeFiles": "public/**"
+    },
     "api/admin/messages/[id].ts": {
       "includeFiles": "public/**"
     },
