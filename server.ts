@@ -49,7 +49,7 @@ function authenticateAdmin(req: AuthRequest, res: Response, next: NextFunction) 
   }
 }
 
-async function startServer() {
+export async function createApp() {
   await db.ready;
   const app = express();
 
@@ -633,9 +633,18 @@ Sitemap: ${domain}/sitemap.xml
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+export const appReady = createApp();
+
+if (process.env.VERCEL !== '1') {
+  appReady.then(app => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }).catch(error => {
+    console.error('Failed to start server:', error);
+    process.exitCode = 1;
+  });
+}
