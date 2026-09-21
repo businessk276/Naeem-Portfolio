@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import {
   PortfolioData,
   Profile,
@@ -24,6 +27,9 @@ import {
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
+const FIRESTORE_DOCUMENT = 'portfolio/main';
+
+dotenv.config();
 
 export interface DatabaseSchema {
   users: (User & { password_hash: string })[];
@@ -697,10 +703,32 @@ const defaultDatabase: DatabaseSchema = {
 
 export class Database {
   private data: DatabaseSchema;
+  private firestore = this.createFirestore();
+  public readonly ready: Promise<void>;
 
   constructor() {
     this.ensureDir();
-    this.data = this.load();
+    this.data = this.loadLocal();
+    this.ready = this.loadFromFirestore();
+  }
+
+  private createFirestore() {
+    const firebaseConfig = {
+      apiKey: process.env.VITE_FIREBASE_API_KEY,
+      authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.VITE_FIREBASE_APP_ID,
+    };
+
+    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+      console.warn('Firebase is not configured; using local database fallback.');
+      return null;
+    }
+
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    return getFirestore(app);
   }
 
   private ensureDir() {
@@ -709,7 +737,7 @@ export class Database {
     }
   }
 
-  private load(): DatabaseSchema {
+  private loadLocal(): DatabaseSchema {
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
@@ -725,7 +753,7 @@ export class Database {
     } catch (err) {
       console.error('Error reading db.json, using defaults:', err);
     }
-    this.save(defaultDatabase);
+    this.saveLocal(defaultDatabase);
     return defaultDatabase;
   }
 
@@ -733,10 +761,45 @@ export class Database {
     if (newData) {
       this.data = newData;
     }
+
+    if (this.firestore) {
+      void setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data })
+        .catch(err => console.error('Error saving Firestore database:', err));
+      return;
+    }
+
+    this.saveLocal();
+  }
+
+  private saveLocal(newData?: DatabaseSchema) {
+    if (newData) {
+      this.data = newData;
+    }
     try {
       fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
     } catch (err) {
       console.error('Error saving db.json:', err);
+    }
+  }
+
+  private async loadFromFirestore() {
+    if (!this.firestore) return;
+
+    try {
+      const snapshot = await getDoc(doc(this.firestore, FIRESTORE_DOCUMENT));
+      if (snapshot.exists()) {
+        const stored = snapshot.data().data as Partial<DatabaseSchema>;
+        this.data = {
+          ...defaultDatabase,
+          ...stored,
+          profile: { ...defaultDatabase.profile, ...(stored.profile || {}) },
+          site_settings: { ...defaultDatabase.site_settings, ...(stored.site_settings || {}) },
+        };
+      } else {
+        await setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data });
+      }
+    } catch (err) {
+      console.error('Error loading Firestore database; using local data:', err);
     }
   }
 

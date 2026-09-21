@@ -50,6 +50,7 @@ function authenticateAdmin(req: AuthRequest, res: Response, next: NextFunction) 
 }
 
 async function startServer() {
+  await db.ready;
   const app = express();
 
   app.use(express.json({ limit: '50mb' }));

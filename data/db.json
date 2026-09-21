@@ -21,7 +21,7 @@
   ],
   "profile": {
     "id": "prof_1",
-    "name": "MD. JOBAER",
+    "name": "MD. JOBAER Ahmed ",
     "professional_title": "IT SUPPORT ENGINEER",
     "supporting_line": "IT Support • Web Development • Networking • Digital Marketing",
     "short_intro": "Dedicated and skilled IT Support Engineer with expertise in computer troubleshooting, network system support, office management, digital marketing, client hunting and lead generation.",
@@ -29,12 +29,12 @@
     "location": "Al Aziziyah, Riyadh, Saudi Arabia (KSA)",
     "phone": "0538196763",
     "email": "Jidny7080@gmail.com",
-    "profile_image": "/src/assets/images/jobaer_profile_1789985465704.jpg",
+    "profile_image": "/uploads/ChatGPT_Image_Sep_21__2026__05_01_46_PM_png_1789996213184.png",
     "logo_text": "MJ",
     "availability_status": "AVAILABLE FOR WORK / PROJECTS",
     "iqama_status": "Transferable Iqama (9 Month Valid)",
     "resume_url": "",
-    "updated_at": "2026-09-21T10:15:00.711Z"
+    "updated_at": "2026-09-21T13:10:14.827Z"
   },
   "social_links": [
     {
@@ -751,7 +751,13 @@
       "publish_date": "2024-06-15",
       "duration": "18:45",
       "lab_badge": "ENTERPRISE LAB",
-      "tools_used": ["Cisco Packet Tracer 8.2.1", "Cisco 2960 Switch", "Cisco 2911 Router", "CLI Commands", "Wireshark"],
+      "tools_used": [
+        "Cisco Packet Tracer 8.2.1",
+        "Cisco 2960 Switch",
+        "Cisco 2911 Router",
+        "CLI Commands",
+        "Wireshark"
+      ],
       "key_steps": [
         "Designed network topology with Management, Engineering, and Guest VLANs",
         "Configured 802.1Q dot1q encapsulation and trunk links between switches",
@@ -773,7 +779,13 @@
       "publish_date": "2024-07-02",
       "duration": "24:10",
       "lab_badge": "BENCH REPAIR",
-      "tools_used": ["Digital Multimeter", "PCI-e POST Diagnostic Card", "Soldering Station", "Thermal Paste", "Magnifier"],
+      "tools_used": [
+        "Digital Multimeter",
+        "PCI-e POST Diagnostic Card",
+        "Soldering Station",
+        "Thermal Paste",
+        "Magnifier"
+      ],
       "key_steps": [
         "Connected 24-pin ATX breakout to test standby 5VSB and power-good signal rails",
         "Measured VRM low-side and high-side MOSFETs for short-to-ground conditions",
@@ -795,7 +807,13 @@
       "publish_date": "2024-08-10",
       "duration": "15:30",
       "lab_badge": "COMMERCIAL SETUP",
-      "tools_used": ["Hikvision 4K NVR", "PoE Dome & Bullet Cameras", "Cat6 RJ45 Crimper", "iVMS-4200 Software", "Cable Tester"],
+      "tools_used": [
+        "Hikvision 4K NVR",
+        "PoE Dome & Bullet Cameras",
+        "Cat6 RJ45 Crimper",
+        "iVMS-4200 Software",
+        "Cable Tester"
+      ],
       "key_steps": [
         "Terminated 4 Cat6 runs according to TIA/EIA 568B standard with continuity check",
         "Allocated static subnets for cameras isolated from corporate guest Wi-Fi",
@@ -817,7 +835,13 @@
       "publish_date": "2024-09-01",
       "duration": "21:15",
       "lab_badge": "SERVER ADMIN",
-      "tools_used": ["Windows Server 2022", "Hyper-V Virtualization", "Active Directory (AD DS)", "PowerShell", "GPMC"],
+      "tools_used": [
+        "Windows Server 2022",
+        "Hyper-V Virtualization",
+        "Active Directory (AD DS)",
+        "PowerShell",
+        "GPMC"
+      ],
       "key_steps": [
         "Promoted standalone server to primary Domain Controller for corp.local forest",
         "Established OU tree for Management, IT, and Finance with inheritance controls",
@@ -839,7 +863,13 @@
       "publish_date": "2024-09-18",
       "duration": "14:20",
       "lab_badge": "SERVER RACK LAB",
-      "tools_used": ["110 Punch Down Tool", "24-Port Cat6 Patch Panel", "Cable Stripper", "Fluke Network Tester", "Velcro Ties"],
+      "tools_used": [
+        "110 Punch Down Tool",
+        "24-Port Cat6 Patch Panel",
+        "Cable Stripper",
+        "Fluke Network Tester",
+        "Velcro Ties"
+      ],
       "key_steps": [
         "Stripped outer PVC jacket preserving 0.5-inch pair twist up to termination point",
         "Punched down all 8 conductors conforming to ANSI/TIA-568-B color sequence",
@@ -861,7 +891,13 @@
       "publish_date": "2024-10-05",
       "duration": "17:40",
       "lab_badge": "FULL-STACK DEMO",
-      "tools_used": ["HTML5 & CSS3", "JavaScript ES6+", "Relational Database (SQL)", "REST API", "Figma Wireframing"],
+      "tools_used": [
+        "HTML5 & CSS3",
+        "JavaScript ES6+",
+        "Relational Database (SQL)",
+        "REST API",
+        "Figma Wireframing"
+      ],
       "key_steps": [
         "Engineered responsive frontend with client-side form validation and role gates",
         "Structured relational database schemas with primary/foreign keys for club rosters",
