@@ -4,9 +4,9 @@
   "functions": {
     "api/index.ts": {
       "includeFiles": "public/**"
+    },
+    "api/[...path].ts": {
+      "includeFiles": "public/**"
     }
-  },
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" }
-  ]
+  }
 }
