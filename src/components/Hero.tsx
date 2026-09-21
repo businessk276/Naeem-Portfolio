@@ -315,7 +315,7 @@ export default function Hero({ profile, onOpenCV }: HeroProps) {
               <div className="relative z-10 w-full h-full rounded-full overflow-hidden border-4 sm:border-[5px] border-white dark:border-[#121212] shadow-2xl bg-neutral-900 group">
                 {!imageError ? (
                   <img
-                    src={profile.profile_image || '/src/assets/images/jobaer_profile_1789985465704.jpg'}
+                    src={profile.profile_image || '/uploads/jobaer_profile_1789985465704.jpg'}
                     alt={profile.name || 'Md. Jobaer'}
                     className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                     onError={() => setImageError(true)}

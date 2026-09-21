@@ -377,7 +377,7 @@
       "category": "Web & Software Application",
       "short_description": "Complete digital management system for university clubs, member registration, and departmental coordination.",
       "full_description": "Engineered a full club management web platform allowing student leaders to handle member enrollments, allocate executive roles, schedule workshops, and publish notifications with real-time tracking.",
-      "thumbnail_url": "/src/assets/images/project_club_mgmt_1789985482555.jpg",
+      "thumbnail_url": "/uploads/project_club_mgmt_1789985482555.jpg",
       "technologies": [
         "HTML5",
         "CSS3",
@@ -399,7 +399,7 @@
       "category": "Web Development",
       "short_description": "Web-based library management platform for catalog search, book tracking, and student borrow logs.",
       "full_description": "Developed an interactive digital library cataloging application that simplifies book indexing, student book loans, overdue date monitoring, and category filtering.",
-      "thumbnail_url": "/src/assets/images/project_library_web_1789985532412.jpg",
+      "thumbnail_url": "/uploads/project_library_web_1789985532412.jpg",
       "technologies": [
         "Web Programming",
         "HTML5",
@@ -421,7 +421,7 @@
       "category": "Network Engineering",
       "short_description": "Enterprise network architecture with VLANs, guest Wi-Fi segregation, and secure routing for hospitality.",
       "full_description": "Designed and simulated a multi-department hotel infrastructure utilizing Cisco Packet Tracer. Configured distinct subnets for management, guest rooms, point-of-sale systems, and IP surveillance cameras with robust ACL security.",
-      "thumbnail_url": "/src/assets/images/project_cisco_net_1789985504492.jpg",
+      "thumbnail_url": "/uploads/project_cisco_net_1789985504492.jpg",
       "technologies": [
         "Cisco Packet Tracer",
         "VLAN Configuration",
@@ -464,7 +464,7 @@
       "category": "Network Engineering",
       "short_description": "University network system configured in Cisco Packet Tracer 8.2.1 with active email and web services.",
       "full_description": "Constructed an end-to-end LAN simulation interconnecting client workstations, Cisco switches, and central servers running HTTP, DNS, and Mail services (SMTP/POP3) with complete verification.",
-      "thumbnail_url": "/src/assets/images/project_cisco_net_1789985504492.jpg",
+      "thumbnail_url": "/uploads/project_cisco_net_1789985504492.jpg",
       "technologies": [
         "Cisco Packet Tracer 8.2.1",
         "Mail Server",

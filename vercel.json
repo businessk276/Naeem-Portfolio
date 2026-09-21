@@ -10,6 +10,9 @@
     },
     "api/portfolio.ts": {
       "includeFiles": "public/**"
+    },
+    "api/auth/login.ts": {
+      "includeFiles": "public/**"
     }
   }
 }

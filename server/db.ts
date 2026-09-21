@@ -216,7 +216,7 @@ const defaultDatabase: DatabaseSchema = {
       category: 'Web & Software Application',
       short_description: 'Complete digital management system for university clubs, member registration, and departmental coordination.',
       full_description: 'Engineered a full club management web platform allowing student leaders to handle member enrollments, allocate executive roles, schedule workshops, and publish notifications with real-time tracking.',
-      thumbnail_url: '/src/assets/images/project_club_mgmt_1789985482555.jpg',
+      thumbnail_url: '/uploads/project_club_mgmt_1789985482555.jpg',
       technologies: ['HTML5', 'CSS3', 'JavaScript', 'Database Systems', 'UI/UX'],
       live_url: '',
       github_url: 'https://github.com',
@@ -232,7 +232,7 @@ const defaultDatabase: DatabaseSchema = {
       category: 'Web Development',
       short_description: 'Web-based library management platform for catalog search, book tracking, and student borrow logs.',
       full_description: 'Developed an interactive digital library cataloging application that simplifies book indexing, student book loans, overdue date monitoring, and category filtering.',
-      thumbnail_url: '/src/assets/images/project_library_web_1789985532412.jpg',
+      thumbnail_url: '/uploads/project_library_web_1789985532412.jpg',
       technologies: ['Web Programming', 'HTML5', 'CSS3', 'JavaScript', 'SQL'],
       live_url: '',
       github_url: 'https://github.com',
@@ -248,7 +248,7 @@ const defaultDatabase: DatabaseSchema = {
       category: 'Network Engineering',
       short_description: 'Enterprise network architecture with VLANs, guest Wi-Fi segregation, and secure routing for hospitality.',
       full_description: 'Designed and simulated a multi-department hotel infrastructure utilizing Cisco Packet Tracer. Configured distinct subnets for management, guest rooms, point-of-sale systems, and IP surveillance cameras with robust ACL security.',
-      thumbnail_url: '/src/assets/images/project_cisco_net_1789985504492.jpg',
+      thumbnail_url: '/uploads/project_cisco_net_1789985504492.jpg',
       technologies: ['Cisco Packet Tracer', 'VLAN Configuration', 'Routing & Switching', 'Subnetting', 'DHCP'],
       live_url: '',
       github_url: '',
@@ -280,7 +280,7 @@ const defaultDatabase: DatabaseSchema = {
       category: 'Network Engineering',
       short_description: 'University network system configured in Cisco Packet Tracer 8.2.1 with active email and web services.',
       full_description: 'Constructed an end-to-end LAN simulation interconnecting client workstations, Cisco switches, and central servers running HTTP, DNS, and Mail services (SMTP/POP3) with complete verification.',
-      thumbnail_url: '/src/assets/images/project_cisco_net_1789985504492.jpg',
+      thumbnail_url: '/uploads/project_cisco_net_1789985504492.jpg',
       technologies: ['Cisco Packet Tracer 8.2.1', 'Mail Server', 'HTTP Server', 'DNS Configuration', 'LAN Infrastructure'],
       live_url: '',
       github_url: '',
@@ -743,12 +743,12 @@ export class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
         // ensure default structure
-        return {
+        return this.normalizeAssetPaths({
           ...defaultDatabase,
           ...parsed,
           profile: { ...defaultDatabase.profile, ...(parsed.profile || {}) },
           site_settings: { ...defaultDatabase.site_settings, ...(parsed.site_settings || {}) },
-        };
+        });
       }
     } catch (err) {
       console.error('Error reading db.json, using defaults:', err);
@@ -789,12 +789,12 @@ export class Database {
       const snapshot = await getDoc(doc(this.firestore, FIRESTORE_DOCUMENT));
       if (snapshot.exists()) {
         const stored = snapshot.data().data as Partial<DatabaseSchema>;
-        this.data = {
+        this.data = this.normalizeAssetPaths({
           ...defaultDatabase,
           ...stored,
           profile: { ...defaultDatabase.profile, ...(stored.profile || {}) },
           site_settings: { ...defaultDatabase.site_settings, ...(stored.site_settings || {}) },
-        };
+        });
       } else {
         await setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data });
       }
@@ -805,6 +805,16 @@ export class Database {
 
   public getRaw(): DatabaseSchema {
     return this.data;
+  }
+
+  private normalizeAssetPaths(data: DatabaseSchema): DatabaseSchema {
+    const normalize = (value: string) => value?.replace(/^\/src\/assets\/images\//, '/uploads/') || value;
+    return {
+      ...data,
+      profile: { ...data.profile, profile_image: normalize(data.profile.profile_image) },
+      site_settings: { ...data.site_settings, og_image: normalize(data.site_settings.og_image) },
+      projects: data.projects.map(project => ({ ...project, thumbnail_url: normalize(project.thumbnail_url) })),
+    };
   }
 
   // Public portfolio view with published items only
