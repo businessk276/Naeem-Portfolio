@@ -19,6 +19,12 @@
     },
     "api/admin/messages/[id].ts": {
       "includeFiles": "public/**"
+    },
+    "api/admin/[...path].ts": {
+      "includeFiles": "public/**"
+    },
+    "api/auth/[...path].ts": {
+      "includeFiles": "public/**"
     }
   }
 }
