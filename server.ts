@@ -4,6 +4,9 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { randomUUID } from 'crypto';
+import { getApps } from 'firebase-admin/app';
+import { getStorage } from 'firebase-admin/storage';
 import { createServer as createViteServer } from 'vite';
 import { db, Database } from './server/db.js';
 
@@ -396,14 +399,19 @@ Sitemap: ${domain}/sitemap.xml
 
   // Profile
   app.put('/api/admin/profile', authenticateAdmin, async (req, res) => {
-    const raw = db.getRaw();
-    raw.profile = {
-      ...raw.profile,
-      ...req.body,
-      updated_at: new Date().toISOString(),
-    };
-    await db.save(raw);
-    res.json({ success: true, profile: raw.profile });
+    try {
+      const raw = db.getRaw();
+      raw.profile = {
+        ...raw.profile,
+        ...req.body,
+        updated_at: new Date().toISOString(),
+      };
+      await db.save(raw);
+      res.json({ success: true, profile: raw.profile });
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ error: 'Failed to save profile to Firebase' });
+    }
   });
 
   // Site Settings
@@ -575,7 +583,7 @@ Sitemap: ${domain}/sitemap.xml
   });
 
   // Media Upload (supports base64 image data payload)
-  app.post('/api/admin/upload', authenticateAdmin, (req, res) => {
+  app.post('/api/admin/upload', authenticateAdmin, async (req, res) => {
     try {
       const { dataUrl, filename } = req.body;
       if (!dataUrl) {
@@ -599,11 +607,28 @@ Sitemap: ${domain}/sitemap.xml
 
       const safeName = (filename || 'upload').replace(/[^a-zA-Z0-9_-]/g, '_');
       const uniqueFilename = `${safeName}_${Date.now()}.${ext}`;
-      const destPath = path.join(UPLOADS_DIR, uniqueFilename);
+      const apps = getApps();
+      if (apps.length === 0) {
+        throw new Error('Firebase Admin is not initialized');
+      }
 
-      fs.writeFileSync(destPath, buffer);
+      const bucketName = process.env.FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET;
+      if (!bucketName) {
+        throw new Error('FIREBASE_STORAGE_BUCKET is not configured');
+      }
 
-      const fileUrl = `/uploads/${uniqueFilename}`;
+      const storagePath = `uploads/${uniqueFilename}`;
+      const bucket = getStorage(apps[0]).bucket(bucketName);
+      const file = bucket.file(storagePath);
+      const downloadToken = randomUUID();
+      await file.save(buffer, {
+        metadata: {
+          contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+          metadata: { firebaseStorageDownloadTokens: downloadToken },
+        },
+      });
+
+      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(storagePath)}?alt=media&token=${downloadToken}`;
       res.json({
         success: true,
         url: fileUrl,
