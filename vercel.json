@@ -7,6 +7,9 @@
     },
     "api/[...path].ts": {
       "includeFiles": "public/**"
+    },
+    "api/portfolio.ts": {
+      "includeFiles": "public/**"
     }
   }
 }
