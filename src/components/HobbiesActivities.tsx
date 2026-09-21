@@ -67,7 +67,7 @@ export default function HobbiesActivities({ activities, hobbies }: HobbiesActivi
           <motion.div
             initial={{ opacity: 0, x: -25 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ duration: 0.6 }}
             className="lg:col-span-7"
           >
@@ -83,7 +83,7 @@ export default function HobbiesActivities({ activities, hobbies }: HobbiesActivi
                     key={act.id}
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className={`p-6 rounded-2xl bg-neutral-50 dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 flex items-start gap-4 shadow-xs transition-all hover:shadow-md ${
                       isRover ? 'hover:border-red-400/60' : 'hover:border-sky-400/60'
@@ -127,7 +127,7 @@ export default function HobbiesActivities({ activities, hobbies }: HobbiesActivi
           <motion.div
             initial={{ opacity: 0, x: 25 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ duration: 0.6, delay: 0.15 }}
             className="lg:col-span-5"
           >
@@ -143,7 +143,7 @@ export default function HobbiesActivities({ activities, hobbies }: HobbiesActivi
                     key={h.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.4, delay: i * 0.08 }}
                     className={`p-5 rounded-xl bg-neutral-50/80 dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 flex items-start gap-3 transition-all hover:shadow-md ${theme.hoverBorder}`}
                   >

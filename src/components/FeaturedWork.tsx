@@ -97,10 +97,10 @@ export default function FeaturedWork({ projects, onSelectProject }: FeaturedWork
             return (
               <motion.div
                 key={project.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 100, scale: 0.94 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: idx * 0.12 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 1.15, delay: idx * 0.16, ease: [0.16, 1, 0.3, 1] }}
                 className="group cursor-pointer flex flex-col"
                 onClick={() => onSelectProject(project)}
               >

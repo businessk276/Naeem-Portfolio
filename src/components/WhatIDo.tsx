@@ -100,10 +100,10 @@ export default function WhatIDo({ services, skills }: WhatIDoProps) {
               return (
                 <motion.div
                   key={srv.id}
-                  initial={{ opacity: 0, y: 25 }}
+                  initial={{ opacity: 0, y: 90, scale: 0.94 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 1.1, delay: idx * 0.14, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col justify-between p-4 rounded-xl border border-neutral-100 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-900/30 hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-lg transition-all group"
                 >
                   <div>
@@ -150,10 +150,10 @@ export default function WhatIDo({ services, skills }: WhatIDoProps) {
             
             {/* Left Title: • SKILLS / SKILLS THAT DRIVE IMPACT */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -100 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              viewport={{ once: false }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-4"
             >
               <div className="flex items-center gap-2 mb-4">
@@ -178,10 +178,10 @@ export default function WhatIDo({ services, skills }: WhatIDoProps) {
               {skillBars.map((sk, index) => (
                 <motion.div
                   key={sk.name}
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 70 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 1, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
                   className="space-y-2 p-3 rounded-xl bg-neutral-50/50 dark:bg-neutral-900/30 border border-neutral-100 dark:border-neutral-900"
                 >
                   <div className="flex items-center justify-between text-xs">
@@ -198,8 +198,8 @@ export default function WhatIDo({ services, skills }: WhatIDoProps) {
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: `${sk.level}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                      viewport={{ once: false }}
+                      transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
                       className={`h-full bg-gradient-to-r ${sk.grad} rounded-full`}
                     />
                   </div>

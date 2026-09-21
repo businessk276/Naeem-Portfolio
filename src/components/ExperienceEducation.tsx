@@ -86,7 +86,7 @@ export default function ExperienceEducation({
                     key={exp.id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className={`p-8 rounded-2xl bg-white dark:bg-[#121212] border shadow-xs transition-all hover:shadow-lg ${
                       isCurrent
@@ -148,7 +148,7 @@ export default function ExperienceEducation({
                   key={edu.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className="p-8 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between hover:border-sky-400/50 transition-all hover:shadow-lg"
                 >
@@ -214,7 +214,7 @@ export default function ExperienceEducation({
                     key={cert.id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{ duration: 0.5, delay: idx * 0.08 }}
                     className={`p-6 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between transition-all hover:shadow-lg ${certTheme.hover}`}
                   >

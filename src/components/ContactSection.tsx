@@ -72,10 +72,10 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
           {/* LEFT: Heading, Direct Contacts, Availability        */}
           {/* ==================================================== */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -100 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+            viewport={{ once: false }}
+            transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 flex flex-col justify-between"
           >
             <div>
@@ -155,10 +155,10 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
           {/* RIGHT: High-Contrast Minimalist Contact Form        */}
           {/* ==================================================== */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 100 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            viewport={{ once: false }}
+            transition={{ duration: 1.15, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7"
           >
             <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs">

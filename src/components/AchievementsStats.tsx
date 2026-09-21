@@ -66,7 +66,7 @@ export default function AchievementsStats({ awards, testimonials }: Achievements
                 key={brand.name}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 className="flex flex-col items-center justify-center text-center p-3 opacity-60 hover:opacity-100 transition-opacity"
               >
@@ -112,7 +112,7 @@ export default function AchievementsStats({ awards, testimonials }: Achievements
                   key={aw.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false }}
                   transition={{ duration: 0.6, delay: idx * 0.1 }}
                   className={`p-5 rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/70 dark:bg-neutral-900/40 transition-all hover:shadow-md ${theme.cardBorder}`}
                 >
@@ -159,7 +159,7 @@ export default function AchievementsStats({ awards, testimonials }: Achievements
                   key={item.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
+                  viewport={{ once: false, amount: 0.2 }}
                   transition={{ duration: 0.6, delay: index * 0.15 }}
                   className={`p-8 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between transition-all hover:shadow-lg ${borderHoverColors[index % 3]}`}
                 >
@@ -206,7 +206,7 @@ export default function AchievementsStats({ awards, testimonials }: Achievements
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ duration: 0.7 }}
               className="lg:col-span-8"
             >
@@ -230,7 +230,7 @@ export default function AchievementsStats({ awards, testimonials }: Achievements
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="lg:col-span-4 flex flex-col items-start lg:items-end justify-center"
             >

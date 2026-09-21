@@ -99,10 +99,10 @@ export default function InsightsVideos({ videos, onPlayVideo }: InsightsVideosPr
         {/* ========================================================= */}
         {activeFeaturedVideo && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 85 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: false }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
             className="mb-16 p-6 sm:p-8 lg:p-10 rounded-3xl bg-neutral-50 dark:bg-[#121212] border border-neutral-200/90 dark:border-neutral-800/90 shadow-xl relative overflow-hidden"
           >
             {/* Top Bar inside showcase */}
@@ -284,10 +284,10 @@ export default function InsightsVideos({ videos, onPlayVideo }: InsightsVideosPr
             return (
               <motion.div
                 key={video.id}
-                initial={{ opacity: 0, y: 25 }}
+                initial={{ opacity: 0, y: 85, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.08 }}
+                viewport={{ once: false }}
+                transition={{ duration: 1.05, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => {
                   setSelectedVideoId(video.id);
                 }}

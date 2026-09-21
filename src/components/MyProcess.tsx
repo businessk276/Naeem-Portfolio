@@ -57,10 +57,10 @@ export default function MyProcess({ steps }: MyProcessProps) {
             {steps.map((step, idx) => (
               <motion.div
                 key={step.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 95, scale: 0.94 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 1.1, delay: idx * 0.14, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col p-6 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 {/* Step Icon & Number */}

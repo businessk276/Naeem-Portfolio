@@ -26,10 +26,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
           
           {/* Left Column: Heading, Paragraph, Signature */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -110 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-4 flex flex-col justify-between"
           >
             <div>
@@ -68,10 +68,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
 
           {/* Center Column: Big Number & Metric Breakdown matching reference */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 100 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 1.2, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-3 flex flex-col justify-center pl-0 lg:pl-4"
           >
             {/* Big Experience Number with Fire Gradient */}
@@ -112,10 +112,10 @@ export default function AboutMe({ profile }: AboutMeProps) {
 
           {/* Right Column: Architectural Image with Bold Red Angular Block */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.86, x: 100 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 1.3, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative"
           >
             <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl group">
