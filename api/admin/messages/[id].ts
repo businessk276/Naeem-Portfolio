@@ -29,13 +29,13 @@ export default async function handler(req: any, res: any) {
     if (req.method === 'PUT') {
       if (!message) return res.status(404).json({ error: 'Message not found' });
       Object.assign(message, req.body || {});
-      db.save(raw);
+      await db.save(raw);
       return res.status(200).json({ success: true, message });
     }
 
     if (req.method === 'DELETE') {
       raw.contact_messages = raw.contact_messages.filter(item => item.id !== id);
-      db.save(raw);
+      await db.save(raw);
       return res.status(200).json({ success: true, message: 'Message deleted' });
     }
 

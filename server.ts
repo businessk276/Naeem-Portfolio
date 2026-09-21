@@ -187,7 +187,7 @@ export async function createApp() {
   });
 
   // Contact form submission
-  app.post('/api/contact', (req, res) => {
+  app.post('/api/contact', async (req, res) => {
     try {
       const { name, email, project_type, message } = req.body;
       if (!name || !email || !message) {
@@ -213,7 +213,7 @@ export async function createApp() {
       };
 
       raw.contact_messages.unshift(newMessage);
-      db.save(raw);
+      await db.save(raw);
 
       res.status(201).json({
         success: true,
@@ -332,7 +332,7 @@ Sitemap: ${domain}/sitemap.xml
     });
   });
 
-  app.put('/api/auth/update-credentials', authenticateAdmin, (req: AuthRequest, res) => {
+  app.put('/api/auth/update-credentials', authenticateAdmin, async (req: AuthRequest, res) => {
     const { email, current_password, new_password, name } = req.body;
     const raw = db.getRaw();
     const userIndex = raw.users.findIndex(u => u.id === req.user?.id);
@@ -360,7 +360,7 @@ Sitemap: ${domain}/sitemap.xml
     user.updated_at = new Date().toISOString();
 
     raw.users[userIndex] = user;
-    db.save(raw);
+    await db.save(raw);
 
     res.json({
       success: true,
@@ -395,33 +395,33 @@ Sitemap: ${domain}/sitemap.xml
   });
 
   // Profile
-  app.put('/api/admin/profile', authenticateAdmin, (req, res) => {
+  app.put('/api/admin/profile', authenticateAdmin, async (req, res) => {
     const raw = db.getRaw();
     raw.profile = {
       ...raw.profile,
       ...req.body,
       updated_at: new Date().toISOString(),
     };
-    db.save(raw);
+    await db.save(raw);
     res.json({ success: true, profile: raw.profile });
   });
 
   // Site Settings
-  app.put('/api/admin/settings', authenticateAdmin, (req, res) => {
+  app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
     const raw = db.getRaw();
     raw.site_settings = {
       ...raw.site_settings,
       ...req.body,
     };
-    db.save(raw);
+    await db.save(raw);
     res.json({ success: true, settings: raw.site_settings });
   });
 
   // Social Links
-  app.put('/api/admin/social_links', authenticateAdmin, (req, res) => {
+  app.put('/api/admin/social_links', authenticateAdmin, async (req, res) => {
     const raw = db.getRaw();
     raw.social_links = req.body;
-    db.save(raw);
+    await db.save(raw);
     res.json({ success: true, social_links: raw.social_links });
   });
 
@@ -449,7 +449,7 @@ Sitemap: ${domain}/sitemap.xml
     });
 
     // POST create item
-    app.post(`/api/admin/${routePath}`, authenticateAdmin, (req, res) => {
+    app.post(`/api/admin/${routePath}`, authenticateAdmin, async (req, res) => {
       const raw = db.getRaw() as any;
       const list = raw[key] || [];
       const itemData = req.body;
@@ -474,12 +474,12 @@ Sitemap: ${domain}/sitemap.xml
 
       list.push(newItem);
       raw[key] = list;
-      db.save(raw);
+      await db.save(raw);
       res.status(201).json({ success: true, item: newItem });
     });
 
     // PUT update item
-    app.put(`/api/admin/${routePath}/:id`, authenticateAdmin, (req, res) => {
+    app.put(`/api/admin/${routePath}/:id`, authenticateAdmin, async (req, res) => {
       const raw = db.getRaw() as any;
       const list = raw[key] || [];
       const { id } = req.params;
@@ -502,22 +502,22 @@ Sitemap: ${domain}/sitemap.xml
 
       list[idx] = { ...list[idx], ...itemData, id };
       raw[key] = list;
-      db.save(raw);
+      await db.save(raw);
       res.json({ success: true, item: list[idx] });
     });
 
     // DELETE item
-    app.delete(`/api/admin/${routePath}/:id`, authenticateAdmin, (req, res) => {
+    app.delete(`/api/admin/${routePath}/:id`, authenticateAdmin, async (req, res) => {
       const raw = db.getRaw() as any;
       const list = raw[key] || [];
       const { id } = req.params;
       raw[key] = list.filter((x: any) => String(x.id) !== String(id));
-      db.save(raw);
+      await db.save(raw);
       res.json({ success: true, message: 'Item deleted' });
     });
 
     // REORDER items
-    app.post(`/api/admin/${routePath}/reorder`, authenticateAdmin, (req, res) => {
+    app.post(`/api/admin/${routePath}/reorder`, authenticateAdmin, async (req, res) => {
       const { ids } = req.body; // array of IDs in new order
       if (!Array.isArray(ids)) {
         return res.status(400).json({ error: 'ids array required' });
@@ -543,7 +543,7 @@ Sitemap: ${domain}/sitemap.xml
       });
 
       raw[key] = reordered;
-      db.save(raw);
+      await db.save(raw);
       res.json({ success: true, items: reordered });
     });
   });
@@ -554,7 +554,7 @@ Sitemap: ${domain}/sitemap.xml
     res.json(raw.contact_messages || []);
   });
 
-  app.put('/api/admin/messages/:id', authenticateAdmin, (req, res) => {
+  app.put('/api/admin/messages/:id', authenticateAdmin, async (req, res) => {
     const raw = db.getRaw();
     const { id } = req.params;
     const msg = raw.contact_messages.find(m => m.id === id);
@@ -562,15 +562,15 @@ Sitemap: ${domain}/sitemap.xml
       return res.status(404).json({ error: 'Message not found' });
     }
     Object.assign(msg, req.body);
-    db.save(raw);
+    await db.save(raw);
     res.json({ success: true, message: msg });
   });
 
-  app.delete('/api/admin/messages/:id', authenticateAdmin, (req, res) => {
+  app.delete('/api/admin/messages/:id', authenticateAdmin, async (req, res) => {
     const raw = db.getRaw();
     const { id } = req.params;
     raw.contact_messages = raw.contact_messages.filter(m => m.id !== id);
-    db.save(raw);
+    await db.save(raw);
     res.json({ success: true, message: 'Message deleted' });
   });
 

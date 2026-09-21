@@ -757,14 +757,13 @@ export class Database {
     return defaultDatabase;
   }
 
-  public save(newData?: DatabaseSchema) {
+  public async save(newData?: DatabaseSchema): Promise<void> {
     if (newData) {
       this.data = newData;
     }
 
     if (this.firestore) {
-      void setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data })
-        .catch(err => console.error('Error saving Firestore database:', err));
+      await setDoc(doc(this.firestore, FIRESTORE_DOCUMENT), { data: this.data });
       return;
     }
 
