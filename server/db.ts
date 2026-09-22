@@ -3,7 +3,7 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { Firestore, getFirestore, initializeFirestore } from 'firebase-admin/firestore';
 import {
   PortfolioData,
   Profile,
@@ -701,6 +701,31 @@ const defaultDatabase: DatabaseSchema = {
   },
 };
 
+function parsePrivateKey(value?: string) {
+  if (!value) return undefined;
+  let key = value.trim();
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+  return key.replace(/\\n/g, '\n');
+}
+
+function stripUndefined<T>(value: T): T {
+  if (value === undefined) return value;
+  if (value === null || typeof value !== 'object') {
+    return typeof value === 'number' && Number.isNaN(value) ? (null as T) : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => stripUndefined(item)).filter(item => item !== undefined) as T;
+  }
+  const output: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    if (nested === undefined || typeof nested === 'function') continue;
+    output[key] = stripUndefined(nested);
+  }
+  return output as T;
+}
+
 export class Database {
   private data: DatabaseSchema;
   private firestore = this.createFirestore();
@@ -715,7 +740,11 @@ export class Database {
   private createFirestore() {
     const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    const privateKey = parsePrivateKey(process.env.FIREBASE_PRIVATE_KEY);
+    const storageBucket =
+      process.env.FIREBASE_STORAGE_BUCKET ||
+      process.env.VITE_FIREBASE_STORAGE_BUCKET ||
+      (projectId ? `${projectId}.appspot.com` : undefined);
 
     if (!projectId || !clientEmail || !privateKey) {
       if (process.env.VERCEL === '1') {
@@ -729,13 +758,31 @@ export class Database {
       ? getApps()[0]
       : initializeApp({
           credential: cert({ projectId, clientEmail, privateKey }),
+          projectId,
+          storageBucket,
         });
-    return getFirestore(app);
+
+    try {
+      return initializeFirestore(app, { preferRest: true } as any);
+    } catch {
+      const firestore = getFirestore(app);
+      try {
+        firestore.settings({ ignoreUndefinedProperties: true, preferRest: true } as Parameters<Firestore['settings']>[0]);
+      } catch {
+        // Settings can only be applied once per warm serverless instance.
+      }
+      return firestore;
+    }
   }
 
   private ensureDir() {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    if (process.env.VERCEL === '1') return;
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+    } catch (err) {
+      console.warn('Could not create data directory:', err);
     }
   }
 
@@ -755,7 +802,9 @@ export class Database {
     } catch (err) {
       console.error('Error reading db.json, using defaults:', err);
     }
-    this.saveLocal(defaultDatabase);
+    if (process.env.VERCEL !== '1') {
+      this.saveLocal(defaultDatabase);
+    }
     return defaultDatabase;
   }
 
@@ -765,8 +814,12 @@ export class Database {
     }
 
     if (this.firestore) {
-      await this.firestore.doc(FIRESTORE_DOCUMENT).set({ data: this.data });
+      await this.firestore.doc(FIRESTORE_DOCUMENT).set({ data: stripUndefined(this.data) });
       return;
+    }
+
+    if (process.env.VERCEL === '1') {
+      throw new Error('Firebase Admin is not initialized, so portfolio changes cannot be saved on Vercel.');
     }
 
     this.saveLocal();

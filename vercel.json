@@ -28,6 +28,9 @@
     },
     "api/auth/[...path].ts": {
       "includeFiles": "public/**"
+    },
+    "api/contact.ts": {
+      "includeFiles": "public/**"
     }
   }
 }

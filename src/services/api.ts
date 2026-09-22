@@ -1,5 +1,13 @@
 import { PortfolioData, ContactMessage } from '../types.js';
 
+async function readJson(res: Response, fallback: string) {
+  const json = await res.json().catch(() => ({} as { error?: string }));
+  if (!res.ok) {
+    throw new Error(json.error || fallback);
+  }
+  return json;
+}
+
 export const api = {
   // Public portfolio
   async getPortfolio(): Promise<PortfolioData> {
@@ -52,8 +60,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Failed to update profile');
-    return res.json();
+    return readJson(res, 'Failed to update profile');
   },
 
   // Admin update settings
@@ -66,8 +73,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Failed to update settings');
-    return res.json();
+    return readJson(res, 'Failed to update settings');
   },
 
   // Admin generic entity CRUD
@@ -80,8 +86,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Failed to create ${entityPath}`);
-    return res.json();
+    return readJson(res, `Failed to create ${entityPath}`);
   },
 
   async updateEntity(token: string, entityPath: string, id: string, data: any) {
@@ -93,8 +98,7 @@ export const api = {
       },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Failed to update ${entityPath}`);
-    return res.json();
+    return readJson(res, `Failed to update ${entityPath}`);
   },
 
   async deleteEntity(token: string, entityPath: string, id: string) {
@@ -102,8 +106,7 @@ export const api = {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error(`Failed to delete ${entityPath}`);
-    return res.json();
+    return readJson(res, `Failed to delete ${entityPath}`);
   },
 
   async reorderEntities(token: string, entityPath: string, ids: string[]) {
@@ -115,8 +118,7 @@ export const api = {
       },
       body: JSON.stringify({ ids }),
     });
-    if (!res.ok) throw new Error(`Failed to reorder ${entityPath}`);
-    return res.json();
+    return readJson(res, `Failed to reorder ${entityPath}`);
   },
 
   // Admin Messages

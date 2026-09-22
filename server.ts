@@ -4,11 +4,20 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { randomUUID } from 'crypto';
-import { getApps } from 'firebase-admin/app';
-import { getStorage } from 'firebase-admin/storage';
-import { createServer as createViteServer } from 'vite';
-import { db, Database } from './server/db.js';
+import { db } from './server/db.js';
+import {
+  createEntityRecord,
+  deleteEntityRecord,
+  ENTITY_ROUTES,
+  EntityPath,
+  publicError,
+  reorderEntityRecords,
+  updateEntityRecord,
+  updateProfileRecord,
+  updateSettingsRecord,
+  updateSocialLinks,
+  uploadImage,
+} from './server/admin-api.js';
 
 dotenv.config();
 
@@ -16,8 +25,12 @@ const PORT = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'md-jobaer-portfolio-super-secret-key-2026';
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+} catch (error) {
+  console.warn('Could not create uploads directory:', error);
 }
 
 // Copy default profile image to uploads if available
@@ -336,40 +349,45 @@ Sitemap: ${domain}/sitemap.xml
   });
 
   app.put('/api/auth/update-credentials', authenticateAdmin, async (req: AuthRequest, res) => {
-    const { email, current_password, new_password, name } = req.body;
-    const raw = db.getRaw();
-    const userIndex = raw.users.findIndex(u => u.id === req.user?.id);
+    try {
+      const { email, current_password, new_password, name } = req.body;
+      const raw = db.getRaw();
+      const userIndex = raw.users.findIndex(u => u.id === req.user?.id);
 
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'User not found' });
+      if (userIndex === -1) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const user = raw.users[userIndex];
+      if (new_password) {
+        if (!current_password) {
+          return res.status(400).json({ error: 'Current password is required to set a new password' });
+        }
+        if (!bcrypt.compareSync(current_password, user.password_hash)) {
+          return res.status(400).json({ error: 'Current password does not match' });
+        }
+        if (new_password.length < 6) {
+          return res.status(400).json({ error: 'New password must be at least 6 characters' });
+        }
+        user.password_hash = bcrypt.hashSync(new_password, 10);
+      }
+
+      if (email) user.email = email.trim();
+      if (name) user.name = name.trim();
+      user.updated_at = new Date().toISOString();
+
+      raw.users[userIndex] = user;
+      await db.save(raw);
+
+      res.json({
+        success: true,
+        message: 'Account credentials updated successfully',
+        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      });
+    } catch (error) {
+      console.error('Credentials update error:', error);
+      res.status(500).json({ error: publicError(error, 'Failed to update credentials') });
     }
-
-    const user = raw.users[userIndex];
-    if (new_password) {
-      if (!current_password) {
-        return res.status(400).json({ error: 'Current password is required to set a new password' });
-      }
-      if (!bcrypt.compareSync(current_password, user.password_hash)) {
-        return res.status(400).json({ error: 'Current password does not match' });
-      }
-      if (new_password.length < 6) {
-        return res.status(400).json({ error: 'New password must be at least 6 characters' });
-      }
-      user.password_hash = bcrypt.hashSync(new_password, 10);
-    }
-
-    if (email) user.email = email.trim();
-    if (name) user.name = name.trim();
-    user.updated_at = new Date().toISOString();
-
-    raw.users[userIndex] = user;
-    await db.save(raw);
-
-    res.json({
-      success: true,
-      message: 'Account credentials updated successfully',
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
-    });
   });
 
   // ==========================================
@@ -400,56 +418,38 @@ Sitemap: ${domain}/sitemap.xml
   // Profile
   app.put('/api/admin/profile', authenticateAdmin, async (req, res) => {
     try {
-      const raw = db.getRaw();
-      raw.profile = {
-        ...raw.profile,
-        ...req.body,
-        updated_at: new Date().toISOString(),
-      };
-      await db.save(raw);
-      res.json({ success: true, profile: raw.profile });
+      const profile = await updateProfileRecord(req.body || {});
+      res.json({ success: true, profile });
     } catch (error) {
       console.error('Profile update error:', error);
-      res.status(500).json({ error: 'Failed to save profile to Firebase' });
+      res.status(500).json({ error: publicError(error, 'Failed to save profile to Firebase') });
     }
   });
 
   // Site Settings
   app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
-    const raw = db.getRaw();
-    raw.site_settings = {
-      ...raw.site_settings,
-      ...req.body,
-    };
-    await db.save(raw);
-    res.json({ success: true, settings: raw.site_settings });
+    try {
+      const settings = await updateSettingsRecord(req.body || {});
+      res.json({ success: true, settings });
+    } catch (error) {
+      console.error('Settings update error:', error);
+      res.status(500).json({ error: publicError(error, 'Failed to save settings to Firebase') });
+    }
   });
 
   // Social Links
   app.put('/api/admin/social_links', authenticateAdmin, async (req, res) => {
-    const raw = db.getRaw();
-    raw.social_links = req.body;
-    await db.save(raw);
-    res.json({ success: true, social_links: raw.social_links });
+    try {
+      const social_links = await updateSocialLinks(req.body);
+      res.json({ success: true, social_links });
+    } catch (error) {
+      console.error('Social links update error:', error);
+      res.status(500).json({ error: publicError(error, 'Failed to save social links to Firebase') });
+    }
   });
 
-  // Generic Entity CRUD Helper
-  const entityRoutes = [
-    { path: 'projects', key: 'projects', idPrefix: 'proj_' },
-    { path: 'skills', key: 'skills', idPrefix: 'sk_' },
-    { path: 'services', key: 'services', idPrefix: 'srv_' },
-    { path: 'experience', key: 'experience', idPrefix: 'exp_' },
-    { path: 'education', key: 'education', idPrefix: 'edu_' },
-    { path: 'certifications', key: 'certifications', idPrefix: 'cert_' },
-    { path: 'awards', key: 'awards', idPrefix: 'aw_' },
-    { path: 'activities', key: 'activities', idPrefix: 'act_' },
-    { path: 'process', key: 'process_steps', idPrefix: 'prc_' },
-    { path: 'testimonials', key: 'testimonials', idPrefix: 'test_' },
-    { path: 'videos', key: 'youtube_videos', idPrefix: 'yt_' },
-    { path: 'hobbies', key: 'hobbies', idPrefix: 'hb_' },
-  ] as const;
-
-  entityRoutes.forEach(({ path: routePath, key, idPrefix }) => {
+  (Object.keys(ENTITY_ROUTES) as EntityPath[]).forEach((routePath) => {
+    const { key } = ENTITY_ROUTES[routePath];
     // GET all items of key
     app.get(`/api/admin/${routePath}`, authenticateAdmin, (req, res) => {
       const raw = db.getRaw() as any;
@@ -458,101 +458,52 @@ Sitemap: ${domain}/sitemap.xml
 
     // POST create item
     app.post(`/api/admin/${routePath}`, authenticateAdmin, async (req, res) => {
-      const raw = db.getRaw() as any;
-      const list = raw[key] || [];
-      const itemData = req.body;
-
-      // Special YouTube video helper
-      if (key === 'youtube_videos') {
-        const extractedId = Database.extractYouTubeId(itemData.youtube_url);
-        if (extractedId) {
-          itemData.video_id = extractedId;
-          if (!itemData.thumbnail_url) {
-            itemData.thumbnail_url = `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`;
-          }
-        }
+      try {
+        const item = await createEntityRecord(routePath as EntityPath, req.body || {});
+        res.status(201).json({ success: true, item });
+      } catch (error) {
+        console.error(`Create ${routePath} error:`, error);
+        res.status(500).json({ error: publicError(error, `Failed to create ${routePath}`) });
       }
-
-      const newItem = {
-        ...itemData,
-        id: itemData.id || `${idPrefix}${Date.now()}`,
-        sort_order: itemData.sort_order ?? (list.length + 1),
-        created_at: new Date().toISOString(),
-      };
-
-      list.push(newItem);
-      raw[key] = list;
-      await db.save(raw);
-      res.status(201).json({ success: true, item: newItem });
     });
 
     // PUT update item
     app.put(`/api/admin/${routePath}/:id`, authenticateAdmin, async (req, res) => {
-      const raw = db.getRaw() as any;
-      const list = raw[key] || [];
-      const { id } = req.params;
-      const idx = list.findIndex((x: any) => String(x.id) === String(id));
-
-      if (idx === -1) {
-        return res.status(404).json({ error: 'Item not found' });
+      try {
+        const item = await updateEntityRecord(routePath as EntityPath, String(req.params.id), req.body || {});
+        res.json({ success: true, item });
+      } catch (error: any) {
+        console.error(`Update ${routePath} error:`, error);
+        res.status(error?.status === 404 ? 404 : 500).json({
+          error: publicError(error, `Failed to update ${routePath}`),
+        });
       }
-
-      const itemData = req.body;
-      if (key === 'youtube_videos' && itemData.youtube_url) {
-        const extractedId = Database.extractYouTubeId(itemData.youtube_url);
-        if (extractedId) {
-          itemData.video_id = extractedId;
-          if (!itemData.thumbnail_url || itemData.thumbnail_url.includes('youtube.com')) {
-            itemData.thumbnail_url = `https://img.youtube.com/vi/${extractedId}/hqdefault.jpg`;
-          }
-        }
-      }
-
-      list[idx] = { ...list[idx], ...itemData, id };
-      raw[key] = list;
-      await db.save(raw);
-      res.json({ success: true, item: list[idx] });
     });
 
     // DELETE item
     app.delete(`/api/admin/${routePath}/:id`, authenticateAdmin, async (req, res) => {
-      const raw = db.getRaw() as any;
-      const list = raw[key] || [];
-      const { id } = req.params;
-      raw[key] = list.filter((x: any) => String(x.id) !== String(id));
-      await db.save(raw);
-      res.json({ success: true, message: 'Item deleted' });
+      try {
+        await deleteEntityRecord(routePath as EntityPath, String(req.params.id));
+        res.json({ success: true, message: 'Item deleted' });
+      } catch (error) {
+        console.error(`Delete ${routePath} error:`, error);
+        res.status(500).json({ error: publicError(error, `Failed to delete ${routePath}`) });
+      }
     });
 
     // REORDER items
     app.post(`/api/admin/${routePath}/reorder`, authenticateAdmin, async (req, res) => {
-      const { ids } = req.body; // array of IDs in new order
-      if (!Array.isArray(ids)) {
-        return res.status(400).json({ error: 'ids array required' });
-      }
-      const raw = db.getRaw() as any;
-      const list = raw[key] || [];
-      const map = new Map(list.map((x: any) => [String(x.id), x]));
-      const reordered = ids
-        .map((id, index) => {
-          const item = map.get(String(id));
-          if (item) {
-            return { ...item, sort_order: index + 1 };
-          }
-          return null;
-        })
-        .filter(Boolean);
-
-      // append any items missing from ids list
-      list.forEach((item: any) => {
-        if (!ids.includes(String(item.id))) {
-          reordered.push({ ...item, sort_order: reordered.length + 1 });
+      try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids)) {
+          return res.status(400).json({ error: 'ids array required' });
         }
-      });
-
-      raw[key] = reordered;
-      await db.save(raw);
-      res.json({ success: true, items: reordered });
+        const reordered = await reorderEntityRecords(routePath as EntityPath, ids);
+        res.json({ success: true, items: reordered });
+      } catch (error) {
+        console.error(`Reorder ${routePath} error:`, error);
+        res.status(500).json({ error: publicError(error, `Failed to reorder ${routePath}`) });
+      }
     });
   });
 
@@ -563,81 +514,43 @@ Sitemap: ${domain}/sitemap.xml
   });
 
   app.put('/api/admin/messages/:id', authenticateAdmin, async (req, res) => {
-    const raw = db.getRaw();
-    const { id } = req.params;
-    const msg = raw.contact_messages.find(m => m.id === id);
-    if (!msg) {
-      return res.status(404).json({ error: 'Message not found' });
+    try {
+      const raw = db.getRaw();
+      const { id } = req.params;
+      const msg = raw.contact_messages.find(m => m.id === id);
+      if (!msg) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+      Object.assign(msg, req.body);
+      await db.save(raw);
+      res.json({ success: true, message: msg });
+    } catch (error) {
+      console.error('Message update error:', error);
+      res.status(500).json({ error: publicError(error, 'Failed to update message') });
     }
-    Object.assign(msg, req.body);
-    await db.save(raw);
-    res.json({ success: true, message: msg });
   });
 
   app.delete('/api/admin/messages/:id', authenticateAdmin, async (req, res) => {
-    const raw = db.getRaw();
-    const { id } = req.params;
-    raw.contact_messages = raw.contact_messages.filter(m => m.id !== id);
-    await db.save(raw);
-    res.json({ success: true, message: 'Message deleted' });
+    try {
+      const raw = db.getRaw();
+      const { id } = req.params;
+      raw.contact_messages = raw.contact_messages.filter(m => m.id !== id);
+      await db.save(raw);
+      res.json({ success: true, message: 'Message deleted' });
+    } catch (error) {
+      console.error('Message delete error:', error);
+      res.status(500).json({ error: publicError(error, 'Failed to delete message') });
+    }
   });
 
   // Media Upload (supports base64 image data payload)
   app.post('/api/admin/upload', authenticateAdmin, async (req, res) => {
     try {
-      const { dataUrl, filename } = req.body;
-      if (!dataUrl) {
-        return res.status(400).json({ error: 'dataUrl is required' });
-      }
-
-      // Check format: data:image/png;base64,...
-      const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-      if (!match) {
-        return res.status(400).json({ error: 'Invalid base64 image format' });
-      }
-
-      const ext = match[1] === 'jpeg' ? 'jpg' : match[1];
-      const base64Data = match[2];
-      const buffer = Buffer.from(base64Data, 'base64');
-
-      // Max file size 15MB
-      if (buffer.length > 15 * 1024 * 1024) {
-        return res.status(400).json({ error: 'Image size exceeds 15MB limit' });
-      }
-
-      const safeName = (filename || 'upload').replace(/[^a-zA-Z0-9_-]/g, '_');
-      const uniqueFilename = `${safeName}_${Date.now()}.${ext}`;
-      const apps = getApps();
-      if (apps.length === 0) {
-        throw new Error('Firebase Admin is not initialized');
-      }
-
-      const bucketName = process.env.FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET;
-      if (!bucketName) {
-        throw new Error('FIREBASE_STORAGE_BUCKET is not configured');
-      }
-
-      const storagePath = `uploads/${uniqueFilename}`;
-      const bucket = getStorage(apps[0]).bucket(bucketName);
-      const file = bucket.file(storagePath);
-      const downloadToken = randomUUID();
-      await file.save(buffer, {
-        metadata: {
-          contentType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
-          metadata: { firebaseStorageDownloadTokens: downloadToken },
-        },
-      });
-
-      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(storagePath)}?alt=media&token=${downloadToken}`;
-      res.json({
-        success: true,
-        url: fileUrl,
-        filename: uniqueFilename,
-        size: buffer.length,
-      });
+      const result = await uploadImage(req.body?.dataUrl, req.body?.filename);
+      res.json(result);
     } catch (err) {
       console.error('Error handling upload:', err);
-      res.status(500).json({ error: 'Server error processing file upload' });
+      res.status(500).json({ error: publicError(err, 'Server error processing file upload') });
     }
   });
 
@@ -645,6 +558,7 @@ Sitemap: ${domain}/sitemap.xml
   // VITE / STATIC SERVING
   // ==========================================
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
