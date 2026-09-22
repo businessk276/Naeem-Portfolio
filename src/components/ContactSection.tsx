@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Youtube, ArrowUpRight } from 'lucide-react';
 import { Profile, SocialLink } from '../types';
+import { createContactMessage } from '../lib/messages';
 
 interface ContactSectionProps {
   profile: Profile;
@@ -35,6 +36,15 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
 
     try {
       setLoading(true);
+      await createContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        project_type: formData.project_type,
+        message: formData.message.trim(),
+        is_read: false,
+        is_replied: false,
+        status: 'unread',
+      });
       setSuccessMessage('Thank you! Your message has been received.');
       setFormData({
         name: '',
@@ -42,8 +52,9 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
         project_type: 'IT Infrastructure & Support',
         message: '',
       });
-    } catch (err: any) {
-      setErrorMessage('Failed to send message. Please try again.');
+    } catch (error) {
+      console.error('Contact message submission failed:', error);
+      setErrorMessage(error instanceof Error ? `Failed to send message: ${error.message}` : 'Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }

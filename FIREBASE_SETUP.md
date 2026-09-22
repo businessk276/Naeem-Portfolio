@@ -14,6 +14,16 @@ The app uses the Firebase project configured in `.env.local` and stores the publ
 6. Start the app with `npm run dev`.
 7. Click the lock icon in the portfolio navigation, sign in with the admin user, and click **Publish to Firebase**.
 
+## Deploy Firestore rules
+
+The contact form is allowed to create messages publicly, while only authenticated admins can read or delete them. After changing `firestore.rules`, deploy it from the project folder with:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+If you do not use the Firebase CLI, copy the contents of `firestore.rules` into **Firestore Database > Rules** and click **Publish**. The rules must be published in the same Firebase project as the `.env.local` configuration.
+
 The first publish creates the `portfolio/JubartPortfolio` document using the complete local portfolio data. The admin editor controls every section represented by `PortfolioData`; edit the JSON and publish to update the public site.
 
 ## Environment variables
