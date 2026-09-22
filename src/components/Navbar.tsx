@@ -3,16 +3,16 @@ import { motion, useScroll, useSpring } from 'motion/react';
 import { Menu, X, Sun, Moon, Lock, ArrowUpRight, ShieldCheck, Download } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, SiteSettings } from '../types';
+import { getCvDownloadName, getCvHref, downloadOriginalCv } from '../lib/cv';
 
 interface NavbarProps {
   profile: Profile;
   settings: SiteSettings;
   onOpenAdmin: () => void;
   isAdminLoggedIn: boolean;
-  onOpenCV?: () => void;
 }
 
-export default function Navbar({ profile, settings, onOpenAdmin, isAdminLoggedIn, onOpenCV }: NavbarProps) {
+export default function Navbar({ profile, settings, onOpenAdmin, isAdminLoggedIn }: NavbarProps) {
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function Navbar({ profile, settings, onOpenAdmin, isAdminLoggedIn
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
 
-      const sections = ['home', 'about', 'services', 'skills', 'work', 'clients', 'testimonials', 'contact'];
+      const sections = ['home', 'about', 'services', 'skills', 'work', 'clients', 'contact'];
       for (const section of sections) {
         const el = document.getElementById(section);
         if (el) {
@@ -51,8 +51,6 @@ export default function Navbar({ profile, settings, onOpenAdmin, isAdminLoggedIn
     { label: 'ABOUT', href: '#about', id: 'about' },
     { label: 'SERVICES', href: '#services', id: 'services' },
     { label: 'WORK', href: '#work', id: 'work' },
-    { label: 'CLIENTS', href: '#clients', id: 'clients' },
-    { label: 'TESTIMONIALS', href: '#testimonials', id: 'testimonials' },
     { label: 'CONTACT', href: '#contact', id: 'contact' },
   ];
 
@@ -184,19 +182,21 @@ export default function Navbar({ profile, settings, onOpenAdmin, isAdminLoggedIn
               ))}
             </nav>
             <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800 space-y-2">
-              {onOpenCV && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenCV();
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[#FF3B30] border border-red-500/30 text-xs font-bold uppercase tracking-wider cursor-pointer"
-                >
+              <a
+                href={getCvHref(profile.resume_url)}
+                download={getCvDownloadName()}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setMobileMenuOpen(false);
+                  void downloadOriginalCv(profile.resume_url).catch(() => {
+                    window.location.href = getCvHref(profile.resume_url);
+                  });
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-[#FF3B30] border border-red-500/30 text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
                   <Download className="w-4 h-4" />
-                  <span>Download CV</span>
-                </button>
-              )}
+                <span>Download CV</span>
+              </a>
               <a
                 href="#contact"
                 onClick={() => setMobileMenuOpen(false)}

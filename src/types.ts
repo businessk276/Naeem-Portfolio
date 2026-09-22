@@ -107,7 +107,6 @@ export interface Certification {
   name: string;
   issuer: string;
   issue_date: string;
-  credential_url?: string;
   image_url?: string;
   description?: string;
   sort_order: number;

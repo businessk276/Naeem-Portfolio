@@ -2,7 +2,7 @@
 
 The app uses the Firebase project configured in `.env.local` and stores the public portfolio at:
 
-`portfolio/JubartPortfolio`
+`Naeem_portfolio/content`
 
 ## One-time Firebase Console setup
 
@@ -24,7 +24,7 @@ firebase deploy --only firestore:rules
 
 If you do not use the Firebase CLI, copy the contents of `firestore.rules` into **Firestore Database > Rules** and click **Publish**. The rules must be published in the same Firebase project as the `.env.local` configuration.
 
-The first publish creates the `portfolio/JubartPortfolio` document using the complete local portfolio data. The admin editor controls every section represented by `PortfolioData`; edit the JSON and publish to update the public site.
+The first publish creates the `Naeem_portfolio/content` document using the complete local portfolio data. The admin editor controls every section represented by `PortfolioData`; edit the JSON and publish to update the public site.
 
 ## Environment variables
 

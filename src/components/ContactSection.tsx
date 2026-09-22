@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Youtube, ArrowUpRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Mail, Phone, MapPin, CheckCircle2, AlertCircle, Linkedin, Github, ArrowUpRight } from 'lucide-react';
 import { Profile, SocialLink } from '../types';
 import { createContactMessage } from '../lib/messages';
+import { enterFrom } from '../lib/motion';
 
 interface ContactSectionProps {
   profile: Profile;
@@ -10,10 +11,11 @@ interface ContactSectionProps {
 }
 
 export default function ContactSection({ profile, socialLinks }: ContactSectionProps) {
+  const reduced = useReducedMotion();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    project_type: 'IT Infrastructure & Support',
+    project_type: 'Web Development Project',
     message: '',
   });
 
@@ -21,8 +23,8 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const linkedinLink = socialLinks.find(s => s.platform.toLowerCase().includes('linkedin'))?.url || 'https://www.linkedin.com/in/md-jobaer-ahamed-82a382186';
-  const youtubeLink = socialLinks.find(s => s.platform.toLowerCase().includes('youtube'))?.url || 'https://www.youtube.com/@user-ed1sz1sx4i';
+  const linkedinLink = socialLinks.find(s => s.platform.toLowerCase().includes('linkedin'))?.url || '';
+  const githubLink = socialLinks.find(s => s.platform.toLowerCase().includes('github'))?.url || '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +51,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
       setFormData({
         name: '',
         email: '',
-        project_type: 'IT Infrastructure & Support',
+        project_type: 'Web Development Project',
         message: '',
       });
     } catch (error) {
@@ -81,10 +83,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
           {/* LEFT: Heading, Direct Contacts, Availability        */}
           {/* ==================================================== */}
           <motion.div
-            initial={{ opacity: 0, x: -100 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
+            {...enterFrom('left', reduced)}
             className="lg:col-span-5 flex flex-col justify-between"
           >
             <div>
@@ -93,7 +92,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
               </h2>
 
               <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-8 font-normal">
-                Looking to hire a dedicated IT Support Engineer with a valid 9-month transferable Iqama in Riyadh, or need network engineering and system troubleshooting? Reach out directly.
+                Looking to hire a Software Engineer, collaborate on a full-stack web project, or talk about competitive programming and product work? Reach out directly.
               </p>
 
               {/* Direct Info List */}
@@ -137,6 +136,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
 
               {/* Social Channels with authentic brand colors */}
               <div className="flex flex-wrap items-center gap-3">
+                {linkedinLink && (
                 <a
                   href={linkedinLink}
                   target="_blank"
@@ -146,16 +146,19 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
                   <Linkedin className="w-4 h-4" />
                   <span>LinkedIn Profile</span>
                 </a>
+                )}
 
+                {githubLink && (
                 <a
-                  href={youtubeLink}
+                  href={githubLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-red-500/10 dark:bg-red-500/15 border border-red-500/30 text-xs font-bold text-[#FF0000] dark:text-red-400 hover:bg-[#FF0000] hover:text-white transition-all shadow-xs"
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-neutral-900/10 dark:bg-white/10 border border-neutral-400/30 text-xs font-bold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-900 hover:text-white transition-all shadow-xs"
                 >
-                  <Youtube className="w-4 h-4" />
-                  <span>YouTube Channel</span>
+                  <Github className="w-4 h-4" />
+                  <span>GitHub</span>
                 </a>
+                )}
               </div>
             </div>
           </motion.div>
@@ -164,10 +167,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
           {/* RIGHT: High-Contrast Minimalist Contact Form        */}
           {/* ==================================================== */}
           <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 1.15, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            {...enterFrom('right', reduced, 0.12)}
             className="lg:col-span-7"
           >
             <div className="p-8 sm:p-10 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs">
@@ -176,7 +176,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
                 Send a Direct Message
               </h3>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-8 font-normal">
-                Submissions are delivered directly to Md. Jobaer's administrative inbox.
+                Submissions are delivered directly to {profile.name}'s inbox.
               </p>
 
               {successMessage && (
@@ -233,13 +233,11 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
                     onChange={(e) => setFormData({ ...formData, project_type: e.target.value })}
                     className="w-full px-4 py-3.5 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white text-xs font-medium focus:outline-hidden focus:border-[#FF3B30] transition-colors"
                   >
-                    <option value="Full-Time IT Support Role">Full-Time IT Support Role (Riyadh)</option>
-                    <option value="IT Infrastructure & Support">IT Infrastructure & Support</option>
-                    <option value="Cisco Networking & Setup">Cisco Networking & Setup</option>
-                    <option value="CCTV Security Installation">CCTV Security Installation</option>
                     <option value="Web Development Project">Web Development Project</option>
-                    <option value="Digital Marketing & Lead Gen">Digital Marketing & Lead Gen</option>
-                    <option value="General Inquiry">General Technical Inquiry</option>
+                    <option value="Full-Time Software Engineering Role">Full-Time Software Engineering Role</option>
+                    <option value="Teaching or Mentoring">Teaching or Mentoring</option>
+                    <option value="Competitive Programming Collaboration">Competitive Programming Collaboration</option>
+                    <option value="General Inquiry">General Inquiry</option>
                   </select>
                 </div>
 

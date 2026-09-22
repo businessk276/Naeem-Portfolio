@@ -8,6 +8,7 @@ interface HobbiesActivitiesProps {
 }
 
 export default function HobbiesActivities({ activities, hobbies }: HobbiesActivitiesProps) {
+  if (activities.length === 0 && hobbies.length === 0) return null;
   const getHobbyTheme = (iconName: string) => {
     switch (iconName) {
       case 'BookOpen':

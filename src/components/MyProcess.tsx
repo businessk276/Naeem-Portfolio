@@ -1,12 +1,14 @@
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ProcessStep } from '../types';
-import { Search, FileSpreadsheet, PenTool, Code, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Search, FileSpreadsheet, PenTool, Code, CheckCircle2 } from 'lucide-react';
+import { enterFrom } from '../lib/motion';
 
 interface MyProcessProps {
   steps: ProcessStep[];
 }
 
 export default function MyProcess({ steps }: MyProcessProps) {
+  const reduced = useReducedMotion();
   const getStepIcon = (iconName: string) => {
     switch (iconName) {
       case 'Search':
@@ -47,7 +49,7 @@ export default function MyProcess({ steps }: MyProcessProps) {
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 max-w-md font-normal">
-            A disciplined, systematic roadmap from initial diagnostic triage to 24/7 SLA infrastructure support.
+            A software development lifecycle from requirement analysis through debugging and quality delivery.
           </p>
         </div>
 
@@ -57,10 +59,7 @@ export default function MyProcess({ steps }: MyProcessProps) {
             {steps.map((step, idx) => (
               <motion.div
                 key={step.id}
-                initial={{ opacity: 0, y: 95, scale: 0.94 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
-                transition={{ duration: 1.1, delay: idx * 0.14, ease: [0.16, 1, 0.3, 1] }}
+                {...enterFrom(idx % 2 === 0 ? 'up' : 'scale', reduced, idx * 0.1)}
                 className="flex flex-col p-6 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 {/* Step Icon & Number */}

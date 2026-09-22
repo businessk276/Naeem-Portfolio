@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { PortfolioData, Project, YouTubeVideo } from './types';
 import { portfolioData } from './data/portfolio';
 import Navbar from './components/Navbar';
@@ -15,7 +16,6 @@ import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
 import ProjectDetailModal from './components/ProjectDetailModal';
 import VideoPlayerModal from './components/VideoPlayerModal';
-import CVModal from './components/CVModal';
 import AdminPanel from './components/AdminPanel';
 import { getRemotePortfolio } from './lib/portfolio';
 
@@ -42,7 +42,6 @@ export default function App() {
   // Modals & Active Overlays
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
-  const [showCVModal, setShowCVModal] = useState(false);
 
   const handleOpenAdmin = () => {
     const adminUrl = `${window.location.origin}${window.location.pathname}#admin`;
@@ -61,7 +60,32 @@ export default function App() {
   };
 
   if (isLoadingPortfolio) {
-    return <div className="flex min-h-screen items-center justify-center bg-white text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:bg-[#0A0A0A]">Loading portfolio...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-[#0A0A0A]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative h-12 w-12">
+            <span className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-neutral-700" />
+            <motion.span
+              className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#FF3B30] border-r-orange-500"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.1, ease: 'linear', repeat: Infinity }}
+            />
+          </div>
+
+          <div className="relative h-1.5 w-52 overflow-hidden rounded-full bg-neutral-200/80 dark:bg-neutral-800/80">
+            <motion.span
+              className="absolute inset-y-0 left-0 w-1/2 rounded-full bg-gradient-to-r from-transparent via-[#FF3B30] to-transparent"
+              animate={{ x: ['-120%', '180%'] }}
+              transition={{ duration: 1.4, ease: 'easeInOut', repeat: Infinity }}
+            />
+          </div>
+
+          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-neutral-500 dark:text-neutral-400">
+            Loading portfolio...
+          </span>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -73,10 +97,8 @@ export default function App() {
         settings={portfolio.settings}
         onOpenAdmin={handleOpenAdmin}
         isAdminLoggedIn={false}
-        onOpenCV={() => setShowCVModal(true)}
       />
 
-      {/* 1. Hero Section (Replicating exact reference design with circular image animation) */}
       <Hero
         profile={portfolio.profile}
         socialLinks={portfolio.social_links}
@@ -84,7 +106,6 @@ export default function App() {
           const el = document.getElementById('about');
           el?.scrollIntoView({ behavior: 'smooth' });
         }}
-        onOpenCV={() => setShowCVModal(true)}
       />
 
         {/* 2. About Me (Matching exact second section of reference design) */}
@@ -111,11 +132,12 @@ export default function App() {
         {/* 6. My Process: 5-step engineering roadmap */}
         <MyProcess steps={portfolio.process_steps} />
 
-        {/* 7. Insights & YouTube Video System */}
+        {(portfolio.youtube_videos || portfolio.videos || []).length > 0 && (
         <InsightsVideos
           videos={portfolio.youtube_videos || portfolio.videos || []}
           onPlayVideo={(vid) => setSelectedVideo(vid)}
         />
+        )}
 
         {/* 8. Career & Academic Experience */}
         <ExperienceEducation
@@ -124,11 +146,12 @@ export default function App() {
           certifications={portfolio.certifications}
         />
 
-        {/* 9. Extra-Curricular Leadership & Hobbies */}
+        {(portfolio.activities.length > 0 || portfolio.hobbies.length > 0) && (
         <HobbiesActivities
           activities={portfolio.activities}
           hobbies={portfolio.hobbies}
         />
+        )}
 
         {/* 10. Contact Section & Direct Transmission Form */}
         <ContactSection
@@ -156,19 +179,6 @@ export default function App() {
           <VideoPlayerModal
             video={selectedVideo}
             onClose={() => setSelectedVideo(null)}
-          />
-        )}
-
-        {/* Official Curriculum Vitae Modal */}
-        {showCVModal && (
-          <CVModal
-            isOpen={showCVModal}
-            onClose={() => setShowCVModal(false)}
-            profile={portfolio.profile}
-            experience={portfolio.experience}
-            education={portfolio.education}
-            certifications={portfolio.certifications}
-            skills={portfolio.skills}
           />
         )}
 

@@ -7,8 +7,8 @@ import {
 import type { PortfolioData } from '../types';
 import { db } from './firebase';
 
-export const PORTFOLIO_COLLECTION = 'portfolio';
-export const PORTFOLIO_DOCUMENT = 'JubartPortfolio';
+export const PORTFOLIO_COLLECTION = 'Naeem_portfolio';
+export const PORTFOLIO_DOCUMENT = 'content';
 
 const portfolioDocument = doc(db, PORTFOLIO_COLLECTION, PORTFOLIO_DOCUMENT);
 

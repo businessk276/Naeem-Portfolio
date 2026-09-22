@@ -1,5 +1,4 @@
-import { motion } from 'motion/react';
-import { ArrowUp, Linkedin, Youtube, Mail, Phone, MapPin, Lock, ShieldCheck } from 'lucide-react';
+import { ArrowUp, Linkedin, Github, Mail, Lock } from 'lucide-react';
 import { Profile, SocialLink, SiteSettings } from '../types';
 
 interface FooterProps {
@@ -19,21 +18,19 @@ export default function Footer({ profile, socialLinks, settings, onOpenAdmin }: 
     { label: 'About', href: '#about' },
     { label: 'Services', href: '#services' },
     { label: 'Work', href: '#work' },
-    { label: 'Clients', href: '#clients' },
-    { label: 'Testimonials', href: '#testimonials' },
     { label: 'Contact', href: '#contact' },
   ];
 
   const serviceItems = [
-    'Hardware Diagnostics & Repair',
-    'Enterprise Cisco Networking',
-    'Web Architecture & Development',
-    'CCTV Security & Surveillance',
-    'Digital Marketing & Lead Gen',
+    'Full-Stack Web Development',
+    'Competitive Programming',
+    'Prompt Engineering',
+    'Teaching & Mentoring',
+    'Software Development (SDLC)',
   ];
 
-  const linkedinUrl = socialLinks.find((s) => s.platform.toLowerCase().includes('linkedin'))?.url || 'https://www.linkedin.com/in/md-jobaer-ahamed-82a382186';
-  const youtubeUrl = socialLinks.find((s) => s.platform.toLowerCase().includes('youtube'))?.url || 'https://www.youtube.com/@user-ed1sz1sx4i';
+  const linkedinUrl = socialLinks.find((s) => s.platform.toLowerCase().includes('linkedin'))?.url || '';
+  const githubUrl = socialLinks.find((s) => s.platform.toLowerCase().includes('github'))?.url || '';
 
   return (
     <footer className="bg-neutral-950 text-white pt-20 pb-12 border-t border-neutral-900 overflow-hidden">
@@ -52,11 +49,12 @@ export default function Footer({ profile, socialLinks, settings, onOpenAdmin }: 
             </div>
 
             <p className="text-xs text-neutral-400 leading-relaxed font-normal max-w-sm">
-              IT Support Engineer specializing in enterprise Cisco networks, comprehensive PC hardware troubleshooting, CCTV infrastructure, and web solutions in Riyadh, Saudi Arabia.
+              {profile.short_intro}
             </p>
 
             {/* Social Links */}
             <div className="flex items-center gap-3 pt-2">
+              {linkedinUrl && (
               <a
                 href={linkedinUrl}
                 target="_blank"
@@ -66,17 +64,20 @@ export default function Footer({ profile, socialLinks, settings, onOpenAdmin }: 
               >
                 <Linkedin className="w-4 h-4" />
               </a>
+              )}
+              {githubUrl && (
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub"
+                  className="w-9 h-9 rounded-lg bg-neutral-900 hover:bg-[#FF3B30] text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+              )}
               <a
-                href={youtubeUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="YouTube"
-                className="w-9 h-9 rounded-lg bg-neutral-900 hover:bg-[#FF3B30] text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a
-                href={`mailto:${profile.email || 'Jidny7080@gmail.com'}`}
+                href={`mailto:${profile.email}`}
                 aria-label="Email"
                 className="w-9 h-9 rounded-lg bg-neutral-900 hover:bg-[#FF3B30] text-neutral-300 hover:text-white flex items-center justify-center transition-colors"
               >
@@ -126,24 +127,18 @@ export default function Footer({ profile, socialLinks, settings, onOpenAdmin }: 
               CONTACT
             </h4>
             <p className="text-xs text-neutral-300 font-medium">
-              <a href={`mailto:${profile.email || 'Jidny7080@gmail.com'}`} className="hover:text-[#FF3B30] transition-colors">
-                {profile.email || 'Jidny7080@gmail.com'}
+              <a href={`mailto:${profile.email}`} className="hover:text-[#FF3B30] transition-colors">
+                {profile.email}
               </a>
             </p>
             <p className="text-xs text-neutral-300 font-medium">
-              <a href={`tel:${profile.phone || '0538196763'}`} className="hover:text-[#FF3B30] transition-colors">
-                {profile.phone || '0538196763'}
+              <a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="hover:text-[#FF3B30] transition-colors">
+                {profile.phone}
               </a>
             </p>
             <p className="text-xs text-neutral-400 leading-relaxed font-normal">
-              {profile.location || 'Al Aziziyah, Riyadh, Saudi Arabia (KSA)'}
+              {profile.location}
             </p>
-            <div className="pt-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-neutral-900 border border-neutral-800 text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Transferable Iqama
-              </span>
-            </div>
           </div>
 
         </div>
@@ -151,7 +146,7 @@ export default function Footer({ profile, socialLinks, settings, onOpenAdmin }: 
         {/* Bottom Bar: Copyright, Back to Top, Admin Lock */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <p>
-            © {new Date().getFullYear()} {profile.name || 'Md. Jobaer'}. All rights reserved.
+            © {new Date().getFullYear()} {profile.name}. All rights reserved.
           </p>
 
           <div className="flex items-center gap-6">

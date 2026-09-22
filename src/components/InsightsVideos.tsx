@@ -23,6 +23,7 @@ interface InsightsVideosProps {
 }
 
 export default function InsightsVideos({ videos, onPlayVideo }: InsightsVideosProps) {
+  if (!videos.length) return null;
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [selectedVideoId, setSelectedVideoId] = useState<string>(
     videos.length > 0 ? videos[0].id : ''
@@ -75,7 +76,7 @@ export default function InsightsVideos({ videos, onPlayVideo }: InsightsVideosPr
               TECHNICAL LABS & TUTORIALS
             </h2>
             <p className="text-sm sm:text-base text-neutral-600 dark:text-neutral-300 mt-3 font-normal leading-relaxed">
-              Practical demonstrations covering Cisco Packet Tracer, motherboard diagnostics, and network configurations — engineered, executed, and recorded by <strong className="font-bold text-neutral-950 dark:text-white">Md. Jobaer</strong>.
+              Practical demonstrations of working software tasks recorded for this portfolio.
             </p>
           </div>
 
@@ -373,7 +374,7 @@ export default function InsightsVideos({ videos, onPlayVideo }: InsightsVideosPr
 
                   <div className="mt-4 pt-4 border-t border-neutral-200/70 dark:border-neutral-800/70 flex items-center justify-between text-xs">
                     <span className="font-bold text-neutral-500 text-[11px] uppercase tracking-wider">
-                      Md. Jobaer Tech Series
+                      Technical Series
                     </span>
                     
                     <button

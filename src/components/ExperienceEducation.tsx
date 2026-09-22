@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Briefcase, GraduationCap, Award, Calendar, MapPin, CheckCircle2, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Briefcase, GraduationCap, Award, Calendar, MapPin, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { Experience, Education, Certification } from '../types';
+import { enterFrom } from '../lib/motion';
 
 interface ExperienceEducationProps {
   experience: Experience[];
@@ -9,12 +10,38 @@ interface ExperienceEducationProps {
   certifications: Certification[];
 }
 
+function normalizeDriveImageUrl(value?: string) {
+  if (!value) return '';
+  if (!value.includes('drive.google.com') && !value.includes('googleusercontent.com')) return value;
+
+  const driveId =
+    value.match(/\/file\/d\/([^/]+)/i)?.[1] ||
+    value.match(/\/d\/([^/]+)/i)?.[1] ||
+    value.match(/[?&]id=([^&]+)/i)?.[1] ||
+    value.match(/[?&]export=download&id=([^&]+)/i)?.[1] ||
+    value.match(/id=([^&]+)/i)?.[1];
+
+  if (!driveId) return value;
+  return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+}
+
+function getCertificateImageUrl(cert: Certification) {
+  return normalizeDriveImageUrl((cert as any).image_url || (cert as any).credential_url || '');
+}
+
 export default function ExperienceEducation({
   experience,
   education,
   certifications,
 }: ExperienceEducationProps) {
+  const reduced = useReducedMotion();
   const [activeTab, setActiveTab] = useState<'experience' | 'education' | 'certifications'>('experience');
+  const [selectedCertificate, setSelectedCertificate] = useState<Certification | null>(null);
+  const tabs = [
+    { id: 'experience' as const, label: 'EXPERIENCE', icon: Briefcase },
+    { id: 'education' as const, label: 'EDUCATION', icon: GraduationCap },
+    ...(certifications.length > 0 ? [{ id: 'certifications' as const, label: 'CERTIFICATIONS', icon: Award }] : []),
+  ];
 
   return (
     <section
@@ -38,17 +65,12 @@ export default function ExperienceEducation({
               CAREER & CREDENTIALS
             </h2>
             <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mt-2 font-normal">
-              Formal B.Sc in CSE, Engineering Diploma, hands-on enterprise troubleshooting, and professional industry certifications.
+              B.Sc in Computer Science and Engineering, University of Barishal, with teaching assistance in Digital Skill training.
             </p>
           </div>
 
-          {/* Tab Switcher */}
           <div className="flex items-center gap-2">
-            {[
-              { id: 'experience', label: 'EXPERIENCE', icon: Briefcase },
-              { id: 'education', label: 'EDUCATION', icon: GraduationCap },
-              { id: 'certifications', label: 'CERTIFICATIONS', icon: Award },
-            ].map((tab) => {
+            {tabs.map((tab) => {
               const IconComp = tab.icon;
               const isActive = activeTab === tab.id;
               return (
@@ -84,10 +106,7 @@ export default function ExperienceEducation({
                 return (
                   <motion.div
                     key={exp.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: false }}
-                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                    {...enterFrom(idx % 2 === 0 ? 'left' : 'right', reduced, idx * 0.08)}
                     className={`p-8 rounded-2xl bg-white dark:bg-[#121212] border shadow-xs transition-all hover:shadow-lg ${
                       isCurrent
                         ? 'border-red-500/30 dark:border-red-500/30'
@@ -146,16 +165,13 @@ export default function ExperienceEducation({
               {education.map((edu, idx) => (
                 <motion.div
                   key={edu.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  {...enterFrom(idx % 2 === 0 ? 'up' : 'scale', reduced, idx * 0.08)}
                   className="p-8 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between hover:border-sky-400/50 transition-all hover:shadow-lg"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                        {edu.start_year} – {edu.end_year}
+                        {edu.start_year && edu.end_year ? `${edu.start_year} – ${edu.end_year}` : edu.end_year || edu.start_year}
                       </span>
                       {edu.grade && (
                         <span className="text-xs font-black px-2.5 py-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 uppercase">
@@ -195,12 +211,13 @@ export default function ExperienceEducation({
 
           {/* TAB 3: CERTIFICATIONS */}
           {activeTab === 'certifications' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
               {certifications.map((cert, idx) => {
                 const isCisco = cert.issuer.toLowerCase().includes('cisco');
                 const isGoogle = cert.issuer.toLowerCase().includes('google');
                 const isICT = cert.issuer.toLowerCase().includes('ict') || cert.issuer.toLowerCase().includes('ledp');
-                
+                const certImage = getCertificateImageUrl(cert);
+
                 const certTheme = isCisco
                   ? { badge: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20', hover: 'hover:border-sky-400/50' }
                   : isGoogle
@@ -216,46 +233,74 @@ export default function ExperienceEducation({
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: false }}
                     transition={{ duration: 0.5, delay: idx * 0.08 }}
-                    className={`p-6 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between transition-all hover:shadow-lg ${certTheme.hover}`}
+                    className={`p-3 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200/80 dark:border-neutral-800/80 shadow-xs flex flex-col justify-between transition-all hover:shadow-lg ${certTheme.hover}`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${certTheme.badge}`}>
-                          <Award className="w-5 h-5" />
+                      <div className="flex items-center justify-between mb-2">
+                        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center ${certTheme.badge}`}>
+                          <Award className="w-4 h-4" />
                         </div>
-                        <span className="text-[11px] font-mono font-bold text-neutral-400 px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800">
+                        <span className="text-[10px] font-mono font-bold text-neutral-400 px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800">
                           {cert.issue_date}
                         </span>
                       </div>
 
-                      <h3 className="text-xs font-black uppercase tracking-wider text-neutral-950 dark:text-white mb-1 leading-snug">
-                        {cert.name}
-                      </h3>
-                      <p className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-3">
-                        {cert.issuer}
-                      </p>
+                      {certImage ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCertificate(cert)}
+                          className="group relative mb-2 block overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900"
+                          aria-label={`Open ${cert.name} certificate`}
+                        >
+                          <div className="aspect-[16/9] w-full overflow-hidden bg-neutral-50 dark:bg-neutral-900">
+                            <img
+                              src={certImage}
+                              alt={cert.name}
+                              referrerPolicy="no-referrer"
+                              loading="lazy"
+                              onError={(event) => {
+                                const target = event.currentTarget;
+                                target.style.display = 'none';
+                                target.parentElement?.setAttribute('title', 'Certificate image could not be loaded');
+                              }}
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                            />
+                          </div>
+                          <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-black/45 px-2 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                            View certificate <ArrowUpRight className="w-3 h-3" />
+                          </span>
+                        </button>
+                      ) : null}
+
+                      <div className="space-y-1">
+                        <h3 className="text-[10px] font-black uppercase tracking-wider text-neutral-950 dark:text-white leading-snug">
+                          {cert.name}
+                        </h3>
+                        <p className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                          {cert.issuer}
+                        </p>
+                      </div>
 
                       {cert.description && (
-                        <p className="text-xs text-neutral-600 dark:text-neutral-400 font-normal leading-relaxed">
+                        <p className="mt-2 text-[10px] text-neutral-600 dark:text-neutral-400 font-normal leading-relaxed">
                           {cert.description}
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-[11px]">
+                    <div className="mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-[10px]">
                       <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         VERIFIED
                       </span>
-                      {cert.credential_url ? (
-                        <a
-                          href={cert.credential_url}
-                          target="_blank"
-                          rel="noreferrer"
+                      {certImage ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCertificate(cert)}
                           className="font-bold text-[#FF3B30] uppercase flex items-center gap-1 hover:underline"
                         >
-                          Verify <ArrowUpRight className="w-3 h-3" />
-                        </a>
+                          View <ArrowUpRight className="w-3 h-3" />
+                        </button>
                       ) : (
                         <span className="font-bold text-[#FF3B30] uppercase flex items-center gap-1">
                           Certified <ArrowUpRight className="w-3 h-3" />
@@ -265,6 +310,32 @@ export default function ExperienceEducation({
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+
+          {selectedCertificate && (
+            <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+              <div className="relative w-full max-w-4xl rounded-2xl border border-neutral-700 bg-[#111111] p-3 shadow-2xl">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCertificate(null)}
+                  className="absolute right-3 top-3 z-10 rounded-full bg-black/60 p-2 text-white transition hover:bg-black/80"
+                  aria-label="Close certificate preview"
+                >
+                  <ArrowUpRight className="h-4 w-4 rotate-45" />
+                </button>
+                <img
+                  src={getCertificateImageUrl(selectedCertificate)}
+                  alt={selectedCertificate.name}
+                  referrerPolicy="no-referrer"
+                  loading="eager"
+                  onError={(event) => {
+                    const target = event.currentTarget;
+                    target.style.display = 'none';
+                  }}
+                  className="max-h-[80vh] w-full rounded-xl object-contain"
+                />
+              </div>
             </div>
           )}
         </motion.div>
