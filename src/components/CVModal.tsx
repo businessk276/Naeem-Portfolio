@@ -107,13 +107,42 @@ ${certifications
       window.open(profile.resume_url, '_blank');
       return;
     }
-    // Download via official endpoint
+
+    const cvContent = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>${profile.name} | CV</title>
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; padding: 32px; color: #111827; }
+      h1, h2 { margin-bottom: 8px; }
+      .meta { color: #4b5563; }
+      ul { margin-top: 0; }
+    </style>
+  </head>
+  <body>
+    <h1>${profile.name}</h1>
+    <div class="meta">${profile.professional_title}</div>
+    <p>${profile.location} | ${profile.phone} | ${profile.email}</p>
+    <p>${profile.short_intro}</p>
+    <h2>Skills</h2>
+    <ul>${skills.map((s) => `<li>${s.name} (${s.category})</li>`).join('')}</ul>
+    <h2>Experience</h2>
+    <ul>${experience.map((exp) => `<li>${exp.position} at ${exp.company}</li>`).join('')}</ul>
+    <h2>Education</h2>
+    <ul>${education.map((edu) => `<li>${edu.degree} - ${edu.institution}</li>`).join('')}</ul>
+  </body>
+</html>`;
+
+    const blob = new Blob([cvContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = '/api/download-cv';
-    link.download = `Md_Jobaer_IT_Support_Engineer_CV.html`;
+    link.href = url;
+    link.download = 'Md_Jobaer_IT_Support_Engineer_CV.html';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (

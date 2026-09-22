@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PortfolioData, Project, YouTubeVideo } from './types';
-import { api } from './services/api';
+import { portfolioData } from './data/portfolio';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import AboutMe from './components/AboutMe';
@@ -16,100 +16,18 @@ import Footer from './components/Footer';
 import ProjectDetailModal from './components/ProjectDetailModal';
 import VideoPlayerModal from './components/VideoPlayerModal';
 import CVModal from './components/CVModal';
-import AdminLogin from './components/admin/AdminLogin';
-import AdminDashboard from './components/admin/AdminDashboard';
 
 export default function App() {
-  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [portfolio] = useState<PortfolioData>(portfolioData);
 
   // Modals & Active Overlays
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
   const [showCVModal, setShowCVModal] = useState(false);
 
-  // Admin State
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
-  const [adminToken, setAdminToken] = useState<string | null>(() => {
-    return localStorage.getItem('mj_admin_token');
-  });
-
-  const fetchPortfolio = async () => {
-    try {
-      setLoading(true);
-      const data = await api.getPortfolio();
-      setPortfolio(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to connect to portfolio server');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPortfolio();
-  }, []);
-
   const handleOpenAdmin = () => {
-    if (adminToken) {
-      setShowAdminDashboard(true);
-    } else {
-      setShowAdminLogin(true);
-    }
+    return;
   };
-
-  const handleAdminLoginSuccess = (token: string) => {
-    setAdminToken(token);
-    localStorage.setItem('mj_admin_token', token);
-    setShowAdminLogin(false);
-    setShowAdminDashboard(true);
-  };
-
-  const handleAdminLogout = () => {
-    setAdminToken(null);
-    localStorage.removeItem('mj_admin_token');
-    setShowAdminDashboard(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0A0A0A] flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 rounded-full border-3 border-neutral-300 dark:border-neutral-700 border-t-[#FF3B30] animate-spin mb-4" />
-        <span className="text-xs font-black uppercase tracking-[0.2em] text-neutral-900 dark:text-white">
-          MD. JOBAER • PORTFOLIO
-        </span>
-        <span className="text-[11px] text-neutral-500 mt-1 uppercase tracking-widest font-mono">
-          Loading Infrastructure Systems...
-        </span>
-      </div>
-    );
-  }
-
-  if (error || !portfolio) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-md p-8 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/50 text-[#FF3B30] flex items-center justify-center mx-auto mb-4 font-bold text-lg">
-            !
-          </div>
-          <h2 className="text-base font-black uppercase tracking-wider text-neutral-950 dark:text-white mb-2">
-            System Communication Error
-          </h2>
-          <p className="text-xs text-neutral-600 dark:text-neutral-400 mb-6 font-normal leading-relaxed">
-            {error || 'Unable to retrieve portfolio records. Please ensure the backend service is operational.'}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2.5 rounded-lg bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 text-xs font-bold uppercase tracking-wider hover:opacity-90"
-          >
-            Retry Connection
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0A0A0A] text-neutral-900 dark:text-neutral-100 transition-colors duration-200">
@@ -119,7 +37,7 @@ export default function App() {
         profile={portfolio.profile}
         settings={portfolio.settings}
         onOpenAdmin={handleOpenAdmin}
-        isAdminLoggedIn={!!adminToken}
+        isAdminLoggedIn={false}
         onOpenCV={() => setShowCVModal(true)}
       />
 
@@ -203,22 +121,6 @@ export default function App() {
           <VideoPlayerModal
             video={selectedVideo}
             onClose={() => setSelectedVideo(null)}
-          />
-        )}
-
-        {showAdminLogin && (
-          <AdminLogin
-            onLoginSuccess={(token) => handleAdminLoginSuccess(token)}
-            onClose={() => setShowAdminLogin(false)}
-          />
-        )}
-
-        {showAdminDashboard && adminToken && (
-          <AdminDashboard
-            token={adminToken}
-            onLogout={handleAdminLogout}
-            onRefreshPublicData={fetchPortfolio}
-            onCloseAdmin={() => setShowAdminDashboard(false)}
           />
         )}
 

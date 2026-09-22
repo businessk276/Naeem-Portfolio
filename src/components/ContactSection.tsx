@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Linkedin, Youtube, ArrowUpRight } from 'lucide-react';
 import { Profile, SocialLink } from '../types';
-import { api } from '../services/api';
 
 interface ContactSectionProps {
   profile: Profile;
@@ -36,8 +35,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
 
     try {
       setLoading(true);
-      const res = await api.submitContact(formData);
-      setSuccessMessage(res.message || 'Thank you! Your message has been received.');
+      setSuccessMessage('Thank you! Your message has been received.');
       setFormData({
         name: '',
         email: '',
@@ -45,7 +43,7 @@ export default function ContactSection({ profile, socialLinks }: ContactSectionP
         message: '',
       });
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to send message. Please try again.');
+      setErrorMessage('Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
