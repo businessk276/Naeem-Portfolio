@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PortfolioData, Project, YouTubeVideo } from './types';
 import { portfolioData } from './data/portfolio';
 import Navbar from './components/Navbar';
@@ -16,9 +16,28 @@ import Footer from './components/Footer';
 import ProjectDetailModal from './components/ProjectDetailModal';
 import VideoPlayerModal from './components/VideoPlayerModal';
 import CVModal from './components/CVModal';
+import AdminPanel from './components/AdminPanel';
+import { getRemotePortfolio } from './lib/portfolio';
 
 export default function App() {
-  const [portfolio] = useState<PortfolioData>(portfolioData);
+  const [portfolio, setPortfolio] = useState<PortfolioData>(portfolioData);
+  const [isLoadingPortfolio, setIsLoadingPortfolio] = useState(true);
+  const [showAdmin, setShowAdmin] = useState(() => window.location.hash === '#admin');
+
+  useEffect(() => {
+    const handleHashChange = () => setShowAdmin(window.location.hash === '#admin');
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    getRemotePortfolio()
+      .then((remote) => {
+        if (remote) setPortfolio(remote);
+      })
+      .catch((error) => console.warn('Using local portfolio data:', error))
+      .finally(() => setIsLoadingPortfolio(false));
+  }, []);
 
   // Modals & Active Overlays
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -26,8 +45,24 @@ export default function App() {
   const [showCVModal, setShowCVModal] = useState(false);
 
   const handleOpenAdmin = () => {
-    return;
+    const adminUrl = `${window.location.origin}${window.location.pathname}#admin`;
+    const adminWindow = window.open(adminUrl, '_blank', 'noopener,noreferrer');
+
+    if (!adminWindow) {
+      setShowAdmin(true);
+    }
   };
+
+  const handleCloseAdmin = () => {
+    setShowAdmin(false);
+    if (window.location.hash === '#admin') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  };
+
+  if (isLoadingPortfolio) {
+    return <div className="flex min-h-screen items-center justify-center bg-white text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 dark:bg-[#0A0A0A]">Loading portfolio...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0A0A0A] text-neutral-900 dark:text-neutral-100 transition-colors duration-200">
@@ -134,6 +169,14 @@ export default function App() {
             education={portfolio.education}
             certifications={portfolio.certifications}
             skills={portfolio.skills}
+          />
+        )}
+
+        {showAdmin && (
+          <AdminPanel
+            portfolio={portfolio}
+            onClose={handleCloseAdmin}
+            onPublished={setPortfolio}
           />
         )}
 

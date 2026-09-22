@@ -14,6 +14,25 @@
   }
 }
 
+@layer components {
+  .admin-input {
+    width: 100%;
+    border: 1px solid #404040;
+    border-radius: 0.5rem;
+    background: #0d0d0d;
+    padding: 0.75rem 0.875rem;
+    color: #e5e5e5;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+  }
+
+  .admin-input:focus {
+    border-color: #ff3b30;
+    box-shadow: 0 0 0 1px #ff3b30;
+  }
+}
+
 /* Custom minimal scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
