@@ -12,7 +12,7 @@ export default function ProjectDetailModal({ project, onClose }: ProjectDetailMo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-xs animate-fade-in">
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 shadow-2xl"
+        className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -25,19 +25,29 @@ export default function ProjectDetailModal({ project, onClose }: ProjectDetailMo
         </button>
 
         {/* Thumbnail Hero */}
-        <div className="relative aspect-[16/9] w-full bg-neutral-900 overflow-hidden">
-          <img
-            src={project.thumbnail_url}
-            alt={project.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6 text-white">
-            <span className="px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-blue-600 inline-block mb-2">
-              {project.category}
-            </span>
-            <h2 className="text-xl sm:text-2xl font-extrabold">{project.title}</h2>
-          </div>
+        <div className="relative aspect-video w-full bg-neutral-900 overflow-hidden">
+          {project.live_url ? (
+            <iframe
+              src={project.live_url}
+              title={`${project.title} live preview`}
+              className="h-full w-full border-0 bg-white"
+            />
+          ) : (
+            <>
+              <img
+                src={project.thumbnail_url}
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-white">
+                <span className="px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-blue-600 inline-block mb-2">
+                  {project.category}
+                </span>
+                <h2 className="text-xl sm:text-2xl font-extrabold">{project.title}</h2>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Content Body */}

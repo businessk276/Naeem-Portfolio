@@ -51,7 +51,7 @@ export default function FeaturedWork({ projects, onSelectProject }: FeaturedWork
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredProjects.map((project, idx) => {
             const cardThemes = [
               { bg: 'bg-gradient-to-br from-[#0F172A] via-[#0C4A6E] to-[#0369A1]', badge: 'bg-sky-500/20 text-sky-200 border border-sky-400/30', accentText: 'text-sky-300' },
@@ -60,7 +60,6 @@ export default function FeaturedWork({ projects, onSelectProject }: FeaturedWork
               { bg: 'bg-gradient-to-br from-[#2E1065] via-[#1E1B4B] to-[#4F46E5]', badge: 'bg-purple-500/20 text-purple-200 border border-purple-400/30', accentText: 'text-purple-300' },
             ];
             const theme = cardThemes[idx % cardThemes.length];
-            const titleLines = project.title.split(' ');
 
             return (
               <motion.div
@@ -69,26 +68,19 @@ export default function FeaturedWork({ projects, onSelectProject }: FeaturedWork
                 className="group cursor-pointer flex flex-col"
                 onClick={() => onSelectProject(project)}
               >
-                <div className={`relative w-full aspect-[4/5] rounded-xl overflow-hidden mb-4 shadow-md group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1.5 flex items-center justify-center p-6 text-white ${theme.bg}`}>
-                  {project.thumbnail_url && (
+                <div className={`relative w-full aspect-video rounded-xl overflow-hidden mb-4 shadow-md group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1.5 flex items-center justify-center text-white ${theme.bg}`}>
+                  {project.live_url && (
+                    <iframe
+                      src={project.live_url}
+                      title={`${project.title} live preview`}
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full border-0 bg-white pointer-events-none"
+                    />
+                  )}
+                  {!project.live_url && project.thumbnail_url && (
                     <img src={project.thumbnail_url} alt={project.title} className="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 group-hover:scale-105 transition-all duration-700 mix-blend-overlay" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className={`text-[9px] font-extrabold uppercase tracking-[0.2em] px-2.5 py-1 rounded-md backdrop-blur-md ${theme.badge}`}>
-                      {project.category}
-                    </span>
-                  </div>
-                  <div className="relative z-10 text-center px-4">
-                    <span className={`text-[10px] tracking-[0.3em] uppercase block mb-2 font-bold ${theme.accentText}`}>
-                      {(project.technologies || []).slice(0, 2).join(' · ') || project.category}
-                    </span>
-                    <h4 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter leading-tight text-white drop-shadow-md">
-                      {titleLines.slice(0, Math.ceil(titleLines.length / 2)).join(' ')}
-                      <br />
-                      {titleLines.slice(Math.ceil(titleLines.length / 2)).join(' ')}
-                    </h4>
-                  </div>
+                  {!project.live_url && <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />}
                   <div className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-white text-neutral-950 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md">
                     <ArrowUpRight className="w-4 h-4" />
                   </div>
